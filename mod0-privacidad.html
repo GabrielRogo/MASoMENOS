@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MASoMENOS · Módulo 0 — Privacidad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* ── VARIABLES ── */
+:root {
+  --bg:         #0d0d14;
+  --bg2:        #13131f;
+  --bg3:        #1a1a2a;
+  --surface:    #1e1e30;
+  --border:     #2a2a40;
+  --lime:       #b8ff3c;
+  --lime-dim:   rgba(184,255,60,0.10);
+  --lime-glow:  rgba(184,255,60,0.22);
+  --blue:       #4a9eff;
+  --blue-dim:   rgba(74,158,255,0.10);
+  --teal:       #2dd4bf;
+  --teal-dim:   rgba(45,212,191,0.10);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+  --red:        #ff5a5a;
+  --red-dim:    rgba(255,90,90,0.10);
+  --purple:     #a78bfa;
+  --purple-dim: rgba(167,139,250,0.10);
+  --text:       #e8e8f0;
+  --text-soft:  #7a7a9a;
+  --text-dim:   #4a4a6a;
+  --radius:     16px;
+  --radius-sm:  10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+.glow-blob {
+  position: fixed;
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(45,212,191,0.07) 0%, transparent 70%);
+  top: -80px; left: -100px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  padding-bottom: 40px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── CABECERA STICKY ── */
+.mod-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(13,13,20,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  animation: fadeDown 0.4s ease both;
+}
+
+.btn-back {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-soft);
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.7rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn-back:hover { border-color: var(--teal); color: var(--teal); }
+
+.header-info { flex: 1; }
+.header-code {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 1px;
+}
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+/* Chip de progreso */
+.progress-chip {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  transition: all 0.3s;
+}
+.progress-chip.done {
+  color: var(--lime);
+  border-color: rgba(184,255,60,0.3);
+  background: var(--lime-dim);
+}
+
+/* ── BARRA DE PROGRESO SUPERIOR ── */
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--bg3);
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: var(--teal);
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* ── CONTENIDO PRINCIPAL ── */
+.content {
+  padding: 0 20px;
+}
+
+/* ── SECCIÓN INTRO ── */
+.intro-section {
+  padding: 32px 0 24px;
+  animation: fadeUp 0.5s 0.1s ease both;
+  opacity: 0;
+  animation-fill-mode: both;
+}
+
+.mod-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--teal-dim);
+  border: 1px solid rgba(45,212,191,0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--teal);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.intro-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.intro-title em { font-style: normal; color: var(--teal); }
+
+.intro-desc {
+  font-size: 0.88rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+/* ── ÍNDICE DE SECCIONES ── */
+.sections-index {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: fadeUp 0.5s 0.2s ease both;
+  opacity: 0;
+  animation-fill-mode: both;
+}
+.index-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.index-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.index-item:last-child { border-bottom: none; }
+.index-item:hover { color: var(--text); }
+.index-num {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  min-width: 20px;
+}
+.index-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.index-item.completed .index-dot { background: var(--lime); }
+.index-item.active .index-dot { background: var(--teal); }
+
+/* ── TARJETAS DE SECCIÓN ── */
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-top: 16px;
+  animation: fadeUp 0.5s ease both;
+  opacity: 0;
+  animation-fill-mode: both;
+}
+.section-card:nth-child(1) { animation-delay: 0.2s; }
+.section-card:nth-child(2) { animation-delay: 0.3s; }
+.section-card:nth-child(3) { animation-delay: 0.4s; }
+
+.section-card-header {
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.section-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.icon-teal { background: var(--teal-dim); }
+.icon-orange { background: var(--orange-dim); }
+.icon-blue { background: var(--blue-dim); }
+
+.section-card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  flex: 1;
+}
+.section-card-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.section-card-body {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── TARJETA INFO ── */
+.info-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.info-block p {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+.info-block strong { color: var(--text); font-weight: 600; }
+.info-block .highlight { color: var(--teal); }
+.info-block .warn { color: var(--orange); }
+
+/* ── CHIP DATO ── */
+.data-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.data-row:last-child { border-bottom: none; padding-bottom: 0; }
+.data-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.data-text { font-size: 0.82rem; color: var(--text-soft); line-height: 1.5; }
+.data-text strong { color: var(--text); }
+
+/* ── TABLA COMPARATIVA ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+.compare-table th {
+  padding: 8px 10px;
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th:first-child { color: var(--text-soft); }
+.compare-table td {
+  padding: 9px 10px;
+  color: var(--text-soft);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  vertical-align: middle;
+  line-height: 1.4;
+}
+.compare-table td:first-child {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.compare-table tr:last-child td { border-bottom: none; }
+.badge-good { color: var(--lime); font-size: 0.75rem; }
+.badge-warn { color: var(--orange); font-size: 0.75rem; }
+.badge-bad  { color: var(--red);    font-size: 0.75rem; }
+.badge-mid  { color: var(--blue);   font-size: 0.75rem; }
+
+/* Nombre de app en tabla */
+.app-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.app-goat    { background: var(--lime-dim);   color: var(--lime);   border: 1px solid rgba(184,255,60,0.2); }
+.app-ga4     { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,146,60,0.2); }
+.app-meta    { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(74,158,255,0.2); }
+.app-tiktok  { background: rgba(255,0,80,0.1); color: #ff4d6d;      border: 1px solid rgba(255,0,80,0.2); }
+.app-yt      { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(255,90,90,0.2); }
+.app-whatsapp{ background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(45,212,191,0.2); }
+
+/* ── BLOQUES SALUD ── */
+.health-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.health-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+}
+.health-card .hc-icon { font-size: 1.6rem; margin-bottom: 6px; }
+.health-card .hc-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.health-card .hc-desc {
+  font-size: 0.72rem;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+.health-card.accent-lime { border-color: rgba(184,255,60,0.2); }
+.health-card.accent-teal { border-color: rgba(45,212,191,0.2); }
+.health-card.accent-blue { border-color: rgba(74,158,255,0.2); }
+.health-card.accent-orange { border-color: rgba(251,146,60,0.2); }
+
+/* Regla de oro */
+.golden-rule {
+  background: var(--lime-dim);
+  border: 1px solid rgba(184,255,60,0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.golden-rule .gr-icon { font-size: 1.2rem; flex-shrink: 0; }
+.golden-rule .gr-text { font-size: 0.83rem; color: var(--text-soft); line-height: 1.55; }
+.golden-rule strong { color: var(--lime); }
+
+/* ── BOTÓN CONTINUAR ── */
+.btn-continue {
+  width: 100%;
+  background: var(--teal);
+  color: #0d0d14;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  margin-top: 24px;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: -0.01em;
+}
+.btn-continue:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(45,212,191,0.3); }
+.btn-continue:active { transform: translateY(0); }
+
+/* ── QUIZ ── */
+.quiz-section {
+  margin-top: 24px;
+  display: none;
+}
+.quiz-section.visible { display: block; }
+
+.quiz-header-card {
+  background: var(--surface);
+  border: 1px solid rgba(184,255,60,0.2);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.quiz-icon { font-size: 2rem; margin-bottom: 8px; }
+.quiz-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.quiz-desc { font-size: 0.82rem; color: var(--text-soft); line-height: 1.5; }
+
+/* Contador pregunta */
+.q-counter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+.q-counter-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.q-dots {
+  display: flex;
+  gap: 5px;
+}
+.q-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s;
+}
+.q-dot.answered { background: var(--lime); }
+.q-dot.current  { background: var(--teal); transform: scale(1.3); }
+
+/* Tarjeta de pregunta */
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  animation: fadeUp 0.3s ease both;
+}
+.question-text {
+  padding: 18px 18px 14px;
+  font-size: 0.93rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border);
+}
+.question-num {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--teal);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.options-list {
+  padding: 10px 0 6px;
+}
+.option-btn {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 13px 18px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  border-top: 1px solid rgba(255,255,255,0.03);
+}
+.option-btn:first-child { border-top: none; }
+.option-btn:hover:not(:disabled) { background: rgba(255,255,255,0.03); }
+.option-btn:disabled { cursor: default; }
+.opt-letter {
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.opt-text {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  line-height: 1.4;
+  flex: 1;
+}
+.option-btn.correct .opt-letter { background: rgba(184,255,60,0.15); border-color: var(--lime); color: var(--lime); }
+.option-btn.correct .opt-text   { color: var(--lime); }
+.option-btn.wrong   .opt-letter { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.option-btn.wrong   .opt-text   { color: var(--red); }
+.option-btn.reveal  .opt-letter { background: rgba(184,255,60,0.08); border-color: rgba(184,255,60,0.3); color: rgba(184,255,60,0.6); }
+
+/* Feedback */
+.feedback-block {
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+.feedback-block.show { display: block; }
+.feedback-block.ok   { color: var(--lime);   background: var(--lime-dim); }
+.feedback-block.fail { color: var(--orange); background: var(--orange-dim); }
+
+/* Botón siguiente */
+.btn-next {
+  width: calc(100% - 36px);
+  margin: 0 18px 14px;
+  background: var(--bg3);
+  color: var(--text-soft);
+  border: 1px solid var(--border);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: none;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-next.show { display: block; }
+.btn-next:hover { border-color: var(--teal); color: var(--teal); }
+
+/* ── RESULTADO FINAL QUIZ ── */
+.quiz-result {
+  display: none;
+  background: var(--surface);
+  border: 1px solid rgba(184,255,60,0.3);
+  border-radius: var(--radius);
+  padding: 28px 22px;
+  text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+.quiz-result.show { display: block; }
+.result-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.result-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--lime);
+  margin-bottom: 8px;
+}
+.result-score {
+  font-family: 'Syne Mono', monospace;
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--lime);
+  margin-bottom: 6px;
+}
+.result-sub {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.result-fail-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.result-fail-sub {
+  font-size: 0.82rem;
+  color: var(--text-soft);
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.btn-retry {
+  width: 100%;
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(251,146,60,0.3);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-bottom: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+}
+.btn-retry:hover { background: rgba(251,146,60,0.18); }
+
+.btn-next-module {
+  width: 100%;
+  background: var(--lime);
+  color: #0d0d14;
+  border: none;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 15px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+}
+.btn-next-module:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(184,255,60,0.35); }
+
+.btn-export-pdf {
+  width: 100%;
+  background: var(--teal-dim);
+  color: var(--teal);
+  border: 1px solid rgba(45,212,191,0.35);
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-top: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-export-pdf:hover { background: rgba(45,212,191,0.18); transform: translateY(-1px); }
+.btn-export-pdf:active { transform: translateY(0); }
+
+/* ── ANIMACIONES ── */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Separador de sección */
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 4px;
+  opacity: 0;
+  animation: fadeUp 0.5s ease both;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Nota de aviso */
+.note-block {
+  background: var(--orange-dim);
+  border: 1px solid rgba(251,146,60,0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+.note-block .note-icon { flex-shrink: 0; font-size: 0.9rem; }
+.note-block strong { color: var(--orange); }
+
+/* Scroll suave */
+html { scroll-behavior: smooth; }
+
+/* ── BLOQUE COOKIES ── */
+.cookies-explainer {
+  background: var(--bg2);
+  border: 1px solid rgba(45,212,191,0.18);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.cookies-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.cookies-emoji { font-size: 1.1rem; }
+.cookies-def {
+  padding: 12px 16px;
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+}
+.cookies-def strong { color: var(--text); }
+.cookies-def em { font-style: normal; color: var(--teal); }
+.cookies-grid {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.ck-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.ck-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+.ck-card.ck-what { border-color: rgba(74,158,255,0.2); }
+.ck-card.ck-good { border-color: rgba(184,255,60,0.2); }
+.ck-card.ck-bad  { border-color: rgba(255,90,90,0.2); }
+.ck-card-title {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.ck-title-good { color: rgba(184,255,60,0.7); }
+.ck-title-bad  { color: rgba(255,90,90,0.7); }
+.ck-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 4px 0;
+  font-size: 0.77rem;
+  color: var(--text-soft);
+  line-height: 1.4;
+}
+.ck-icon { flex-shrink: 0; font-size: 0.8rem; margin-top: 1px; }
+.cookies-types {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.ck-type-label {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.ck-type-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.ck-type-badge {
+  font-family: 'Syne Mono', monospace;
+  font-size: 0.62rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.badge-necessary { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(45,212,191,0.25); }
+.badge-analytics { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(74,158,255,0.25); }
+.badge-marketing { background: var(--orange-dim); color: var(--orange); border: 1px solid rgba(251,146,60,0.25); }
+.badge-third     { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(255,90,90,0.25); }
+.ck-type-desc {
+  font-size: 0.78rem;
+  color: var(--text-soft);
+  line-height: 1.45;
+}
+.cookies-goat-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+
+<div class="glow-blob"></div>
+
+<div class="app">
+
+  <!-- CABECERA STICKY -->
+  <header class="mod-header">
+    <a class="btn-back" href="../index.html">← volver</a>
+    <div class="header-info">
+      <span class="header-code">MASoMENOS · MOD 0</span>
+      <div class="header-title">Privacidad y uso responsable</div>
+    </div>
+    <div class="progress-chip" id="progressChip">0 / 3</div>
+  </header>
+
+  <!-- BARRA DE PROGRESO -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressBar"></div>
+  </div>
+
+  <!-- CONTENIDO -->
+  <div class="content">
+
+    <!-- INTRO -->
+    <div class="intro-section">
+      <div class="mod-badge">🔒 Módulo 0 · Privacidad y uso responsable</div>
+      <h1 class="intro-title">Antes de<br>empezar,<br><em>hablemos.</em></h1>
+      <p class="intro-desc">Esta app recoge algunos datos cuando la usas. En este módulo vas a entender <strong style="color:var(--text)">qué datos son, por qué existen y cómo cuidar tu privacidad</strong> en el día a día digital.</p>
+    </div>
+
+    <!-- ÍNDICE VISUAL -->
+    <div class="sections-index">
+      <div class="index-label">En este módulo</div>
+      <div class="index-item" id="idx-0" onclick="scrollToSection('sec-datos')">
+        <span class="index-num">1</span>
+        <div class="index-dot"></div>
+        <span>Qué datos recoge esta app</span>
+      </div>
+      <div class="index-item" id="idx-1" onclick="scrollToSection('sec-compare')">
+        <span class="index-num">2</span>
+        <div class="index-dot"></div>
+        <span>Comparativa de apps y privacidad</span>
+      </div>
+      <div class="index-item" id="idx-2" onclick="scrollToSection('sec-salud')">
+        <span class="index-num">3</span>
+        <div class="index-dot"></div>
+        <span>Uso saludable y tiempo de pantalla</span>
+      </div>
+      <div class="index-item" id="idx-3" onclick="scrollToSection('sec-quiz')">
+        <span class="index-num">✎</span>
+        <div class="index-dot"></div>
+        <span>Quiz obligatorio — 8 preguntas</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- SECCIÓN 1 · QUÉ DATOS RECOGE LA APP    -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="section-divider" style="animation-delay:0.3s">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Sección 1 de 3</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div id="sec-datos" class="section-card" style="animation-delay:0.35s">
+      <div class="section-card-header">
+        <div class="section-icon icon-teal">🔍</div>
+        <div>
+          <div class="section-card-title">Qué datos recoge esta app</div>
+          <div class="section-card-sub">GoatCounter · Analíticas mínimas y respetuosas</div>
+        </div>
+      </div>
+      <div class="section-card-body">
+
+        <div class="info-block">
+          <p>Esta app usa <span class="highlight"><strong>GoatCounter</strong></span>, una herramienta de analíticas de código abierto. Su objetivo es que el profe sepa cuántas personas usan la app y qué módulos se visitan más. <strong>No hay nada más.</strong></p>
+        </div>
+
+        <div class="info-block">
+          <div class="data-row">
+            <div class="data-icon">✅</div>
+            <div class="data-text"><strong>Qué SÍ recoge:</strong> cuántas visitas recibe cada página, desde qué país (solo el país, no la ciudad), qué navegador usas y qué tipo de pantalla.</div>
+          </div>
+          <div class="data-row">
+            <div class="data-icon">🚫</div>
+            <div class="data-text"><strong>Qué NO recoge:</strong> tu nombre, tu correo, tu número de teléfono, tu ubicación exacta, fotos, mensajes ni ningún dato personal identificable.</div>
+          </div>
+          <div class="data-row">
+            <div class="data-icon">🍪</div>
+            <div class="data-text"><strong>Cookies:</strong> GoatCounter <span class="highlight">no usa cookies</span>. No necesita seguirte entre sesiones ni guardarte en tu dispositivo.</div>
+          </div>
+          <div class="data-row">
+            <div class="data-icon">🌍</div>
+            <div class="data-text"><strong>Servidores:</strong> los datos se guardan en la Unión Europea, cumpliendo el <strong>RGPD</strong> (Reglamento General de Protección de Datos).</div>
+          </div>
+          <div class="data-row" style="border-bottom:none; padding-bottom:0">
+            <div class="data-icon">👁️</div>
+            <div class="data-text"><strong>Transparencia total:</strong> cualquiera puede ver las estadísticas en <span class="highlight">gabrielrogo.goatcounter.com</span>. Nada se oculta.</div>
+          </div>
+        </div>
+
+        <!-- BLOQUE COOKIES -->
+        <div class="cookies-explainer">
+          <div class="cookies-title">
+            <span class="cookies-emoji">🍪</span>
+            <span>¿Qué es una cookie?</span>
+          </div>
+          <div class="cookies-def">
+            Una <strong>cookie</strong> es un pequeño fichero de texto que una web guarda en tu dispositivo cuando la visitas. Es como una <em>nota adhesiva</em> que el servidor le pone a tu navegador para recordar cosas de ti la próxima vez que entres.
+          </div>
+
+          <div class="cookies-grid">
+            <div class="ck-card ck-what">
+              <div class="ck-card-title">¿Para qué sirven?</div>
+              <div class="ck-item"><span class="ck-icon">🔑</span><span>Que no tengas que iniciar sesión cada vez</span></div>
+              <div class="ck-item"><span class="ck-icon">🛒</span><span>Recordar tu carrito de compra</span></div>
+              <div class="ck-item"><span class="ck-icon">🌐</span><span>Guardar tu idioma o preferencias</span></div>
+              <div class="ck-item"><span class="ck-icon">📊</span><span>Contar cuántas visitas recibe una página</span></div>
+            </div>
+
+            <div class="ck-cols">
+              <div class="ck-card ck-good">
+                <div class="ck-card-title ck-title-good">✓ Ventajas</div>
+                <div class="ck-item"><span class="ck-icon">⚡</span><span>Webs más cómodas y personalizadas</span></div>
+                <div class="ck-item"><span class="ck-icon">💾</span><span>No perder tu progreso al cerrar</span></div>
+                <div class="ck-item"><span class="ck-icon">🔄</span><span>Sesiones persistentes sin relogin</span></div>
+              </div>
+
+              <div class="ck-card ck-bad">
+                <div class="ck-card-title ck-title-bad">✗ Riesgos</div>
+                <div class="ck-item"><span class="ck-icon">👁️</span><span>Rastrearte por múltiples webs</span></div>
+                <div class="ck-item"><span class="ck-icon">🎯</span><span>Construir un perfil de tus hábitos</span></div>
+                <div class="ck-item"><span class="ck-icon">📢</span><span>Publicidad personalizada invasiva</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cookies-types">
+            <div class="ck-type-label">Tipos de cookies que existen</div>
+            <div class="ck-type-row">
+              <span class="ck-type-badge badge-necessary">Necesarias</span>
+              <span class="ck-type-desc">La web no funciona sin ellas. Login, carrito, sesión. No se pueden rechazar.</span>
+            </div>
+            <div class="ck-type-row">
+              <span class="ck-type-badge badge-analytics">Analíticas</span>
+              <span class="ck-type-desc">Cuentan visitas y páginas vistas. Pueden ser anónimas o no.</span>
+            </div>
+            <div class="ck-type-row">
+              <span class="ck-type-badge badge-marketing">Marketing</span>
+              <span class="ck-type-desc">Siguen tus hábitos entre webs para mostrarte anuncios personalizados.</span>
+            </div>
+            <div class="ck-type-row" style="border-bottom:none; padding-bottom:0">
+              <span class="ck-type-badge badge-third">De terceros</span>
+              <span class="ck-type-desc">Las pone una empresa distinta a la web que visitas. Son las más intrusivas.</span>
+            </div>
+          </div>
+
+          <div class="cookies-goat-note">
+            <span>🐐</span>
+            <span>GoatCounter <strong style="color:var(--lime)">no usa ninguno de estos tipos</strong>. Mide sin dejar rastro en tu dispositivo.</span>
+          </div>
+        </div>
+
+        <div class="note-block">
+          <div class="note-icon">💡</div>
+          <div>Que una app recoja <em>pocos datos</em> no significa que sea peor. A veces, <strong>menos datos = más respeto</strong> hacia ti.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- SECCIÓN 2 · COMPARATIVA DE APPS         -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="section-divider" style="animation-delay:0.4s">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Sección 2 de 3</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div id="sec-compare" class="section-card" style="animation-delay:0.45s">
+      <div class="section-card-header">
+        <div class="section-icon icon-orange">⚖️</div>
+        <div>
+          <div class="section-card-title">Comparativa de apps y privacidad</div>
+          <div class="section-card-sub">Qué saben de ti las apps que usas cada día</div>
+        </div>
+      </div>
+      <div class="section-card-body">
+
+        <div class="info-block">
+          <p>Todas las apps gratuitas tienen algún modelo de negocio. Muchas <span class="warn"><strong>monetizan tus datos</strong></span>: los analizan, los venden o los usan para mostrarte publicidad. Aquí tienes una comparativa honesta.</p>
+        </div>
+
+        <div class="info-block" style="padding: 0; overflow: hidden;">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>App</th>
+                <th>Cookies</th>
+                <th>Datos recogidos</th>
+                <th>Perfil</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="app-name app-goat">🐐 GoatCounter</span></td>
+                <td><span class="badge-good">✓ No</span></td>
+                <td style="font-size:0.73rem">Visitas, país, navegador</td>
+                <td><span class="badge-good">✓ No</span></td>
+              </tr>
+              <tr>
+                <td><span class="app-name app-ga4">📊 Google Analytics</span></td>
+                <td><span class="badge-warn">⚠ Sí</span></td>
+                <td style="font-size:0.73rem">Edad, intereses, comportamiento, historial</td>
+                <td><span class="badge-warn">⚠ Sí</span></td>
+              </tr>
+              <tr>
+                <td><span class="app-name app-meta">👍 Facebook / Instagram</span></td>
+                <td><span class="badge-bad">✗ Muchas</span></td>
+                <td style="font-size:0.73rem">Cara, voz, amigos, mensajes, ubicación exacta</td>
+                <td><span class="badge-bad">✗ Detallado</span></td>
+              </tr>
+              <tr>
+                <td><span class="app-name app-tiktok">🎵 TikTok</span></td>
+                <td><span class="badge-bad">✗ Muchas</span></td>
+                <td style="font-size:0.73rem">Pulsaciones, tiempo en cada vídeo, cara, voz, portapapeles</td>
+                <td><span class="badge-bad">✗ Muy detallado</span></td>
+              </tr>
+              <tr>
+                <td><span class="app-name app-yt">▶️ YouTube</span></td>
+                <td><span class="badge-warn">⚠ Sí</span></td>
+                <td style="font-size:0.73rem">Historial, pausas, rebobinados, dispositivo</td>
+                <td><span class="badge-warn">⚠ Sí</span></td>
+              </tr>
+              <tr>
+                <td><span class="app-name app-whatsapp">💬 WhatsApp</span></td>
+                <td><span class="badge-mid">~ Pocos</span></td>
+                <td style="font-size:0.73rem">Contactos, metadatos de mensajes, dispositivo</td>
+                <td><span class="badge-mid">~ Limitado</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="info-block">
+          <div class="data-row">
+            <div class="data-icon">🧩</div>
+            <div class="data-text"><strong>¿Qué es un perfil de usuario?</strong> Es un conjunto de datos que una empresa construye sobre ti para saber cómo eres, qué te gusta y cómo influirte. Con ese perfil te muestran publicidad personalizada o te recomiendan contenido que te "engancha".</div>
+          </div>
+          <div class="data-row">
+            <div class="data-icon">💰</div>
+            <div class="data-text"><strong>¿Por qué es gratis TikTok?</strong> Porque <em>el producto eres tú</em>. Tu atención y tus datos se venden a anunciantes. Si algo es gratis y no entiendes el negocio, pregúntate qué están vendiendo.</div>
+          </div>
+          <div class="data-row" style="border-bottom:none; padding-bottom:0">
+            <div class="data-icon">⚖️</div>
+            <div class="data-text"><strong>RGPD:</strong> En Europa tienes derecho a saber qué datos tienen de ti, a pedir que los borren y a no dar tu consentimiento. Es un derecho, no un trámite.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- SECCIÓN 3 · USO SALUDABLE               -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="section-divider" style="animation-delay:0.5s">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Sección 3 de 3</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div id="sec-salud" class="section-card" style="animation-delay:0.55s">
+      <div class="section-card-header">
+        <div class="section-icon icon-blue">🧠</div>
+        <div>
+          <div class="section-card-title">Uso saludable y tiempo de pantalla</div>
+          <div class="section-card-sub">Tu cerebro también necesita descansar</div>
+        </div>
+      </div>
+      <div class="section-card-body">
+
+        <div class="health-grid">
+          <div class="health-card accent-lime">
+            <div class="hc-icon">⏱️</div>
+            <div class="hc-title">Sesiones cortas</div>
+            <div class="hc-desc">20-30 min de trabajo y 5 min de pausa. Tu concentración lo agradece.</div>
+          </div>
+          <div class="health-card accent-teal">
+            <div class="hc-icon">🌙</div>
+            <div class="hc-title">Sin pantallas 1h antes de dormir</div>
+            <div class="hc-desc">La luz azul retrasa el sueño. Tu cerebro consolida lo aprendido mientras duermes.</div>
+          </div>
+          <div class="health-card accent-blue">
+            <div class="hc-icon">👁️</div>
+            <div class="hc-title">Regla 20-20-20</div>
+            <div class="hc-desc">Cada 20 min, mira 20 segundos a algo a 20 metros. Descansa los ojos.</div>
+          </div>
+          <div class="health-card accent-orange">
+            <div class="hc-icon">📵</div>
+            <div class="hc-title">Modo sin distracciones</div>
+            <div class="hc-desc">Silencia notificaciones cuando estudias. El móvil sobre la mesa baja el rendimiento, aunque no lo uses.</div>
+          </div>
+        </div>
+
+        <div class="golden-rule">
+          <div class="gr-icon">⭐</div>
+          <div class="gr-text">La app MASoMENOS está diseñada para usarse <strong>junto al cuaderno y el bolígrafo</strong>, no en su lugar. Una pantalla es una herramienta, no un fin.</div>
+        </div>
+
+        <div class="note-block" style="margin-top:0">
+          <div class="note-icon">📊</div>
+          <div>¿Cuánto tiempo pasas al día mirando el móvil? Compruébalo en <strong>Ajustes → Bienestar digital</strong> (Android) o <strong>Ajustes → Tiempo de uso</strong> (iPhone). El resultado puede sorprenderte.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- BOTÓN PARA IR AL QUIZ -->
+    <button class="btn-continue" id="btnStartQuiz" onclick="startQuiz()">
+      He leído todo · Empezar el quiz →
+    </button>
+
+    <!-- ════════════════════════════════════════ -->
+    <!-- SECCIÓN 4 · QUIZ                        -->
+    <!-- ════════════════════════════════════════ -->
+    <div id="sec-quiz" class="quiz-section" id="quizSection">
+
+      <div class="section-divider" style="margin-top:8px">
+        <div class="section-divider-line"></div>
+        <div class="section-divider-label">Quiz obligatorio</div>
+        <div class="section-divider-line"></div>
+      </div>
+
+      <div class="quiz-header-card">
+        <div class="quiz-icon">✎</div>
+        <div class="quiz-title">Demuestra que lo has entendido</div>
+        <p class="quiz-desc">8 preguntas. Puedes repetirlo las veces que necesites. Cuando apruebes, el Módulo 1 se desbloquea.</p>
+      </div>
+
+      <!-- Contador y puntos -->
+      <div class="q-counter">
+        <div class="q-counter-label">Pregunta <span id="qNum">1</span> de 8</div>
+        <div class="q-dots" id="qDots"></div>
+      </div>
+
+      <!-- Tarjeta de pregunta -->
+      <div class="question-card" id="questionCard">
+        <div class="question-text">
+          <span class="question-num" id="qNumLabel">P1</span>
+          <span id="qText"></span>
+        </div>
+        <div class="options-list" id="optionsList"></div>
+        <div class="feedback-block" id="feedbackBlock"></div>
+      </div>
+
+      <button class="btn-next" id="btnNext" onclick="nextQuestion()">Siguiente pregunta →</button>
+
+      <!-- RESULTADO FINAL -->
+      <div class="quiz-result" id="quizResult"></div>
+
+    </div>
+
+    <!-- ESPACIO FINAL -->
+    <div style="height: 16px;"></div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ─── PREGUNTAS DEL QUIZ ───────────────────────────────────────────────────────
+const QUESTIONS = [
+  {
+    q: "¿Qué herramienta de analíticas usa la app MASoMENOS?",
+    opts: ["Google Analytics", "GoatCounter", "Facebook Pixel", "TikTok Analytics"],
+    correct: 1,
+    ok: "✓ Correcto. GoatCounter es una herramienta de código abierto, sin cookies y respetuosa con la privacidad.",
+    fail: "No exactamente. La app usa GoatCounter, no Google Analytics ni otras herramientas de grandes empresas."
+  },
+  {
+    q: "¿GoatCounter usa cookies para rastrearte entre sesiones?",
+    opts: ["Sí, como todas las analíticas", "No, no usa cookies", "Solo en el primer acceso", "Depende del navegador"],
+    correct: 1,
+    ok: "✓ Correcto. GoatCounter funciona sin cookies. Por eso no necesita pedirte permiso para ellas.",
+    fail: "Incorrecto. GoatCounter es precisamente especial porque NO usa cookies."
+  },
+  {
+    q: "¿Qué dato personal identificable recoge GoatCounter de ti?",
+    opts: ["Tu nombre completo", "Tu correo electrónico", "Tu número de teléfono", "Ninguno de los anteriores"],
+    correct: 3,
+    ok: "✓ Correcto. GoatCounter solo recoge datos técnicos agregados: visitas, país, navegador. Nada personal.",
+    fail: "Ninguna de esas opciones. GoatCounter no recoge ningún dato personal identificable."
+  },
+  {
+    q: "TikTok puede acceder a tu portapapeles (lo que has copiado). ¿Qué implica esto?",
+    opts: [
+      "Nada, es una función normal de todas las apps",
+      "Puede leer contraseñas u otra info que hayas copiado recientemente",
+      "Solo funciona si le das permiso explícito",
+      "Solo afecta a usuarios de iOS"
+    ],
+    correct: 1,
+    ok: "✓ Correcto. El acceso al portapapeles ha sido documentado en múltiples investigaciones y puede exponer información sensible.",
+    fail: "Incorrecto. El acceso al portapapeles puede exponer contraseñas u otros datos que hayas copiado antes."
+  },
+  {
+    q: "Si una app es completamente gratuita y no explica cómo gana dinero, ¿cuál es el modelo de negocio más probable?",
+    opts: [
+      "Es una ONG que trabaja gratis",
+      "La financia el gobierno",
+      "Monetiza los datos de sus usuarios",
+      "Solo gana dinero con actualizaciones de pago"
+    ],
+    correct: 2,
+    ok: "✓ Correcto. 'Si el producto es gratis, el producto eres tú' es un principio clave de la economía digital.",
+    fail: "Incorrecto. Lo más habitual es que las apps gratuitas ganen dinero con tus datos o tu atención."
+  },
+  {
+    q: "¿Qué significa RGPD?",
+    opts: [
+      "Red Global de Protección Digital",
+      "Reglamento General de Protección de Datos",
+      "Registro de Gestión de Privacidad Digital",
+      "Red de Gestión Personal de Datos"
+    ],
+    correct: 1,
+    ok: "✓ Correcto. El RGPD es la ley europea que protege tu privacidad y te da derechos sobre tus datos.",
+    fail: "Incorrecto. RGPD es el Reglamento General de Protección de Datos, la ley europea de privacidad."
+  },
+  {
+    q: "Según la regla 20-20-20, ¿qué debes hacer cada 20 minutos frente a la pantalla?",
+    opts: [
+      "Cerrar los ojos 20 segundos",
+      "Mirar 20 segundos a algo a 20 metros",
+      "Beber 20 mililitros de agua",
+      "Apagar la pantalla 20 segundos"
+    ],
+    correct: 1,
+    ok: "✓ Correcto. Mirar a la distancia relaja los músculos del ojo y reduce la fatiga visual.",
+    fail: "Incorrecto. La regla es: mirar 20 segundos a algo situado a 20 metros de distancia."
+  },
+  {
+    q: "Para qué está diseñada la app MASoMENOS según el módulo que acabas de leer:",
+    opts: [
+      "Para sustituir el cuaderno y los apuntes del profe",
+      "Para usarse junto al cuaderno y el bolígrafo, como herramienta de apoyo",
+      "Para hacer exámenes online",
+      "Para comunicarse con los compañeros"
+    ],
+    correct: 1,
+    ok: "✓ Correcto. La tecnología es una herramienta de apoyo al aprendizaje, no un sustituto del pensamiento.",
+    fail: "Incorrecto. MASoMENOS está diseñada para usarse junto al cuaderno y el bolígrafo, nunca en su lugar."
+  }
+];
+
+// ─── ESTADO ───────────────────────────────────────────────────────────────────
+let currentQ = 0;
+let answered = new Array(8).fill(false);
+let correct  = new Array(8).fill(false);
+let sectionsDone = 0;
+
+// ─── SCROLL A SECCIÓN ─────────────────────────────────────────────────────────
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── MARCAR SECCIÓN LEÍDA (observador) ────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      if (id === 'sec-datos')   markSection(0);
+      if (id === 'sec-compare') markSection(1);
+      if (id === 'sec-salud')   markSection(2);
+    }
+  });
+}, { threshold: 0.4 });
+
+['sec-datos','sec-compare','sec-salud'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) observer.observe(el);
+});
+
+const sectionsRead = [false, false, false];
+function markSection(n) {
+  if (sectionsRead[n]) return;
+  sectionsRead[n] = true;
+  const idx = document.getElementById('idx-' + n);
+  if (idx) idx.classList.add('completed');
+  updateProgressChip();
+}
+
+function updateProgressChip() {
+  const done = sectionsRead.filter(Boolean).length;
+  const chip = document.getElementById('progressChip');
+  const bar  = document.getElementById('progressBar');
+  chip.textContent = done + ' / 3';
+  bar.style.width  = (done / 4 * 100) + '%'; // 3 secciones + quiz = 4 pasos
+  if (done === 3) {
+    chip.classList.add('done');
+  }
+}
+
+// ─── INICIAR QUIZ ─────────────────────────────────────────────────────────────
+function startQuiz() {
+  const quizSection = document.getElementById('sec-quiz');
+  quizSection.classList.add('visible');
+  document.getElementById('btnStartQuiz').style.display = 'none';
+  quizSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderDots();
+  renderQuestion();
+}
+
+// ─── PUNTOS DE PROGRESO ───────────────────────────────────────────────────────
+function renderDots() {
+  const container = document.getElementById('qDots');
+  container.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const d = document.createElement('div');
+    d.className = 'q-dot';
+    if (answered[i]) d.classList.add(correct[i] ? 'answered' : 'answered');
+    if (i === currentQ && !answered[i]) d.classList.add('current');
+    container.appendChild(d);
+  }
+}
+
+// ─── RENDERIZAR PREGUNTA ──────────────────────────────────────────────────────
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  document.getElementById('qNum').textContent = currentQ + 1;
+  document.getElementById('qNumLabel').textContent = 'P' + (currentQ + 1);
+  document.getElementById('qText').textContent = q.q;
+
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+  const letters = ['A', 'B', 'C', 'D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span class="opt-text">${opt}</span>`;
+    btn.onclick = () => selectOption(i);
+    list.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedbackBlock');
+  fb.className = 'feedback-block';
+  fb.textContent = '';
+
+  const btnNext = document.getElementById('btnNext');
+  btnNext.className = 'btn-next';
+
+  // Animación
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  card.offsetHeight; // reflow
+  card.style.animation = '';
+
+  renderDots();
+}
+
+// ─── SELECCIONAR OPCIÓN ───────────────────────────────────────────────────────
+function selectOption(idx) {
+  if (answered[currentQ]) return;
+  answered[currentQ] = true;
+
+  const q = QUESTIONS[currentQ];
+  const isCorrect = idx === q.correct;
+  correct[currentQ] = isCorrect;
+
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    if (i === idx && !isCorrect) btn.classList.add('wrong');
+    if (i !== idx && i !== q.correct && !isCorrect) btn.classList.add('reveal');
+  });
+
+  const fb = document.getElementById('feedbackBlock');
+  fb.textContent = isCorrect ? q.ok : q.fail;
+  fb.className = 'feedback-block show ' + (isCorrect ? 'ok' : 'fail');
+
+  const btnNext = document.getElementById('btnNext');
+  if (currentQ < 7) {
+    btnNext.textContent = 'Siguiente pregunta →';
+    btnNext.className = 'btn-next show';
+  } else {
+    btnNext.textContent = 'Ver resultado';
+    btnNext.className = 'btn-next show';
+  }
+
+  renderDots();
+}
+
+// ─── SIGUIENTE PREGUNTA ───────────────────────────────────────────────────────
+function nextQuestion() {
+  if (currentQ < 7) {
+    currentQ++;
+    renderQuestion();
+    document.getElementById('questionCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } else {
+    showResult();
+  }
+}
+
+// ─── RESULTADO FINAL ──────────────────────────────────────────────────────────
+function showResult() {
+  const score = correct.filter(Boolean).length;
+  const pass  = score >= 6; // aprueba con 6/8 o más
+
+  document.getElementById('questionCard').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('qCounter') && (document.getElementById('qCounter').style.display = 'none');
+
+  const result = document.getElementById('quizResult');
+  result.innerHTML = '';
+
+  if (pass) {
+    // ─ APROBADO ─
+    // Guardar fecha/hora de superación para el certificado
+    const now = new Date();
+    const fechaStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+    const horaStr  = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    window._certificadoData = { score, fechaStr, horaStr };
+
+    result.innerHTML = `
+      <div class="result-icon">🎉</div>
+      <div class="result-title">¡Módulo completado!</div>
+      <div class="result-score">${score}/8</div>
+      <p class="result-sub">Has demostrado que entiendes cómo funciona la privacidad digital. Puedes avanzar al siguiente módulo.</p>
+      <button class="btn-next-module" onclick="window.location.href='index.html'">
+        Ir al índice → Módulo 1 desbloqueado 🔓
+      </button>
+      <button class="btn-export-pdf" onclick="exportCertificado()">
+        ↓ Exportar certificado PDF
+      </button>
+    `;
+    // Marcar quiz como completado en el índice
+    document.getElementById('idx-3').classList.add('completed');
+    const bar = document.getElementById('progressBar');
+    bar.style.width = '100%';
+    bar.style.background = 'var(--lime)';
+    const chip = document.getElementById('progressChip');
+    chip.textContent = '✓ Completado';
+    chip.classList.add('done');
+    // Guardar en localStorage
+    localStorage.setItem('masomenos_mod0_done', '1');
+  } else {
+    // ─ NO APROBADO ─
+    result.innerHTML = `
+      <div class="result-icon">😓</div>
+      <div class="result-fail-title">Casi, pero no es suficiente</div>
+      <div class="result-score" style="color:var(--orange)">${score}/8</div>
+      <p class="result-fail-sub">Necesitas al menos 6 respuestas correctas. Repasa las secciones anteriores y vuelve a intentarlo. Sin prisa.</p>
+      <button class="btn-retry" onclick="retryQuiz()">Volver a intentarlo ↻</button>
+    `;
+  }
+
+  result.classList.add('show');
+  result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── EXPORTAR CERTIFICADO PDF ─────────────────────────────────────────────────
+function exportCertificado() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const W = 210, H = 297;
+  const data = window._certificadoData || { score: '—', fechaStr: '—', horaStr: '—' };
+
+  // ── Fondo ──
+  doc.setFillColor(13, 13, 20);
+  doc.rect(0, 0, W, H, 'F');
+
+  // ── Borde decorativo ──
+  doc.setDrawColor(45, 212, 191);
+  doc.setLineWidth(0.6);
+  doc.rect(10, 10, W - 20, H - 20);
+  doc.setDrawColor(42, 42, 64);
+  doc.setLineWidth(0.3);
+  doc.rect(12, 12, W - 24, H - 24);
+
+  // ── Logo / nombre app ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.setTextColor(184, 255, 60);
+  doc.text('MASoMENOS', W / 2, 40, { align: 'center' });
+
+  doc.setFontSize(8);
+  doc.setTextColor(74, 74, 106);
+  doc.text('1º ESO · Álgebra', W / 2, 48, { align: 'center' });
+
+  // ── Línea separadora ──
+  doc.setDrawColor(45, 212, 191);
+  doc.setLineWidth(0.4);
+  doc.line(30, 54, W - 30, 54);
+
+  // ── Título del certificado ──
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(232, 232, 240);
+  doc.text('CERTIFICADO DE SUPERACIÓN', W / 2, 70, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(122, 122, 154);
+  doc.text('Módulo 0 · Privacidad y uso responsable', W / 2, 79, { align: 'center' });
+  doc.text('Competencia Digital', W / 2, 86, { align: 'center' });
+
+  // ── Cuerpo del certificado ──
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(200, 200, 215);
+  const bodyText = 'Este documento acredita la superación del quiz obligatorio del Módulo 0';
+  const bodyText2 = 'de la aplicación MASoMENOS, demostrando comprensión de los conceptos';
+  const bodyText3 = 'de privacidad digital, cookies, datos personales y uso saludable de la tecnología.';
+  doc.text(bodyText,  W / 2, 106, { align: 'center' });
+  doc.text(bodyText2, W / 2, 113, { align: 'center' });
+  doc.text(bodyText3, W / 2, 120, { align: 'center' });
+
+  // ── Resultado (puntuación) ──
+  doc.setFillColor(30, 30, 48);
+  doc.setDrawColor(184, 255, 60);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(W / 2 - 28, 132, 56, 28, 4, 4, 'FD');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(26);
+  doc.setTextColor(184, 255, 60);
+  doc.text(`${data.score}/8`, W / 2, 149, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(74, 74, 106);
+  doc.text('RESULTADO', W / 2, 157, { align: 'center' });
+
+  // ── Criterio de superación ──
+  doc.setFontSize(8);
+  doc.setTextColor(74, 74, 106);
+  doc.text('Criterio de superación: 6/8 respuestas correctas', W / 2, 167, { align: 'center' });
+
+  // ── Fecha y hora ──
+  doc.setDrawColor(42, 42, 64);
+  doc.setLineWidth(0.3);
+  doc.line(30, 178, W - 30, 178);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(45, 212, 191);
+  doc.text('Fecha y hora de superación', W / 2, 188, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(232, 232, 240);
+  doc.text(`${data.fechaStr}  ·  ${data.horaStr}`, W / 2, 197, { align: 'center' });
+
+  // ── Nota para el aula virtual ──
+  doc.setFillColor(26, 26, 42);
+  doc.setDrawColor(74, 158, 255);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(25, 210, W - 50, 22, 3, 3, 'FD');
+
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(74, 158, 255);
+  doc.text('Sube este archivo al aula virtual con tu nombre para que tu profe pueda registrar la actividad.', W / 2, 220, { align: 'center', maxWidth: W - 60 });
+  doc.text('La fecha y hora registradas corresponden al momento de superación del quiz.', W / 2, 227, { align: 'center', maxWidth: W - 60 });
+
+  // ── Pie ──
+  doc.setDrawColor(42, 42, 64);
+  doc.setLineWidth(0.3);
+  doc.line(30, 262, W - 30, 262);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(74, 74, 106);
+  doc.text('Gabriel · CC BY-NC-SA 4.0 · MASoMENOS 2026', W / 2, 270, { align: 'center' });
+
+  // ── Guardar ──
+  const fecha = data.fechaStr.replace(/ /g, '_').replace(/\//g, '-');
+  doc.save(`MASoMENOS_M0_Privacidad_${fecha}.pdf`);
+}
+
+// ─── REINTENTAR QUIZ ──────────────────────────────────────────────────────────
+function retryQuiz() {
+  currentQ = 0;
+  answered = new Array(8).fill(false);
+  correct  = new Array(8).fill(false);
+
+  document.getElementById('quizResult').classList.remove('show');
+  document.getElementById('quizResult').innerHTML = '';
+  document.getElementById('questionCard').style.display = '';
+  document.getElementById('btnNext').style.display = '';
+
+  renderQuestion();
+  document.getElementById('questionCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+
+<!-- GoatCounter -->
+<script data-goatcounter="https://gabrielrogo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>

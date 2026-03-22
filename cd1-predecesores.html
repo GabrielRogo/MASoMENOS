@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Predecesores de MASoMENOS · MASoMENOS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg:         #0d0d14;
+  --bg2:        #13131f;
+  --bg3:        #1a1a2a;
+  --surface:    #1e1e30;
+  --border:     #2a2a40;
+  --lime:       #b8ff3c;
+  --lime-dim:   rgba(184,255,60,0.10);
+  --lime-glow:  rgba(184,255,60,0.22);
+  --blue:       #4a9eff;
+  --blue-dim:   rgba(74,158,255,0.10);
+  --teal:       #2dd4bf;
+  --teal-dim:   rgba(45,212,191,0.10);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+  --red:        #ff5a5a;
+  --red-dim:    rgba(255,90,90,0.10);
+  --purple:     #a78bfa;
+  --purple-dim: rgba(167,139,250,0.10);
+  --text:       #e8e8f0;
+  --text-soft:  #7a7a9a;
+  --text-dim:   #4a4a6a;
+  --radius:     16px;
+  --radius-sm:  10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+
+.glow-blob {
+  position: fixed; width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(74,158,255,0.07) 0%, transparent 70%);
+  top: -80px; right: -100px; border-radius: 50%;
+  pointer-events: none; z-index: 0;
+}
+
+.app {
+  position: relative; z-index: 1;
+  min-height: 100vh; padding-bottom: 48px;
+  max-width: 480px; margin: 0 auto;
+}
+
+/* ── CABECERA ── */
+.module-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,20,0.92); backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+
+.btn-back {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-soft); font-family: 'Syne Mono', monospace;
+  font-size: 0.7rem; padding: 6px 12px; border-radius: 8px;
+  cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--blue); color: var(--blue); }
+
+.header-info { flex: 1; }
+.header-code {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+  color: var(--blue); letter-spacing: 0.1em; text-transform: uppercase;
+  display: block; margin-bottom: 1px;
+}
+.header-title {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  color: var(--text); line-height: 1.1;
+}
+
+/* ── CONTENIDO ── */
+.content { padding: 0 20px; }
+
+/* ── INTRO ── */
+.intro-section {
+  padding: 28px 0 20px;
+  animation: fadeUp 0.4s 0.1s ease both; opacity: 0; animation-fill-mode: both;
+}
+
+.mod-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--blue-dim); border: 1px solid rgba(74,158,255,0.25);
+  border-radius: 20px; padding: 5px 14px;
+  font-family: 'Syne Mono', monospace; font-size: 0.65rem;
+  color: var(--blue); letter-spacing: 0.08em; text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.intro-title {
+  font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800;
+  line-height: 1.1; letter-spacing: -0.03em; color: var(--text);
+  margin-bottom: 12px;
+}
+.intro-title em { font-style: normal; color: var(--blue); }
+
+.intro-desc {
+  font-size: 0.88rem; color: var(--text-soft); line-height: 1.6;
+}
+
+/* ── INSTRUCCIONES ── */
+.instrucciones-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--blue); border-radius: var(--radius);
+  padding: 16px 18px; margin-top: 16px;
+  animation: fadeUp 0.4s 0.2s ease both; opacity: 0; animation-fill-mode: both;
+}
+.instrucciones-title {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem;
+  color: var(--blue); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.instrucciones-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.inst-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.83rem; color: var(--text-soft); line-height: 1.5;
+}
+.inst-num {
+  font-family: 'Syne Mono', monospace; font-size: 0.65rem;
+  color: var(--blue); background: var(--blue-dim);
+  border: 1px solid rgba(74,158,255,0.2);
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.inst-item strong { color: var(--text); }
+
+/* ── SEPARADOR ── */
+.section-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 24px 0 16px;
+}
+.section-divider-line { flex: 1; height: 1px; background: var(--border); }
+.section-divider-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem;
+  color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── TARJETA RECURSO ── */
+.recurso-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 14px;
+  animation: fadeUp 0.4s ease both; opacity: 0; animation-fill-mode: both;
+}
+.recurso-card:nth-child(1) { animation-delay: 0.25s; }
+.recurso-card:nth-child(2) { animation-delay: 0.35s; }
+.recurso-card:nth-child(3) { animation-delay: 0.45s; }
+
+.recurso-header {
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2);
+}
+.recurso-num {
+  font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+  color: var(--blue); background: var(--blue-dim);
+  border: 1px solid rgba(74,158,255,0.2);
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.recurso-header-info { flex: 1; }
+.recurso-header-title {
+  font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700;
+  color: var(--text); display: block; margin-bottom: 2px;
+}
+.recurso-header-sub { font-size: 0.72rem; color: var(--text-dim); }
+.recurso-required {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem;
+  color: var(--orange); background: var(--orange-dim);
+  border: 1px solid rgba(251,146,60,0.2); padding: 2px 8px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.recurso-optional {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem;
+  color: var(--text-dim); background: var(--bg3);
+  border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.recurso-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── CAMPOS DEL FORMULARIO ── */
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem;
+  color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.field-label span { color: var(--orange); margin-left: 2px; }
+
+.field-input {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem;
+  color: var(--text); outline: none; width: 100%;
+  transition: border-color 0.18s;
+  -webkit-appearance: none;
+}
+.field-input::placeholder { color: var(--text-dim); }
+.field-input:focus { border-color: var(--blue); }
+.field-input.error { border-color: var(--red); }
+
+textarea.field-input {
+  resize: none; min-height: 80px; line-height: 1.5;
+}
+textarea.field-input.tall { min-height: 60px; }
+
+/* Selector de tipo */
+.tipo-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+}
+.tipo-btn {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 4px;
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tipo-btn:active { transform: scale(0.95); }
+.tipo-btn .tipo-emoji { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+.tipo-btn .tipo-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.55rem;
+  color: var(--text-dim); display: block; line-height: 1.2;
+}
+.tipo-btn.selected {
+  border-color: var(--blue); background: var(--blue-dim);
+}
+.tipo-btn.selected .tipo-label { color: var(--blue); }
+
+/* Estrellas de valoración */
+.stars-row { display: flex; gap: 8px; align-items: center; }
+.star-btn {
+  font-size: 1.6rem; background: none; border: none;
+  cursor: pointer; transition: transform 0.1s;
+  -webkit-tap-highlight-color: transparent; line-height: 1;
+  filter: grayscale(1) opacity(0.3);
+}
+.star-btn.active { filter: none; }
+.star-btn:active { transform: scale(0.85); }
+.stars-value {
+  font-family: 'Syne Mono', monospace; font-size: 0.72rem;
+  color: var(--text-dim); margin-left: 4px;
+}
+
+/* Selector parecido */
+.parecido-row { display: flex; gap: 8px; }
+.parecido-btn {
+  flex: 1; background: var(--bg2); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 8px;
+  cursor: pointer; font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem; color: var(--text-soft);
+  text-align: center; transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.parecido-btn:active { transform: scale(0.96); }
+.parecido-btn.selected {
+  border-color: var(--teal); background: var(--teal-dim); color: var(--teal); font-weight: 600;
+}
+
+/* ── REFLEXIÓN ── */
+.reflexion-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--purple); border-radius: var(--radius);
+  padding: 16px 18px; margin-bottom: 14px;
+  animation: fadeUp 0.4s 0.5s ease both; opacity: 0; animation-fill-mode: both;
+}
+.reflexion-title {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem;
+  color: var(--purple); letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.reflexion-body { display: flex; flex-direction: column; gap: 14px; }
+
+/* ── ERRORES GLOBALES ── */
+.error-banner {
+  background: var(--red-dim); border: 1px solid rgba(255,90,90,0.3);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  font-size: 0.82rem; color: var(--red); line-height: 1.5;
+  display: none; margin-bottom: 14px;
+  animation: fadeUp 0.2s ease both;
+}
+.error-banner.show { display: block; }
+
+/* ── BOTÓN EXPORTAR ── */
+.btn-export {
+  width: 100%; background: var(--blue);
+  color: #0d0d14; border: none;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800;
+  padding: 16px; border-radius: var(--radius);
+  cursor: pointer; transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  letter-spacing: -0.01em;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin-bottom: 14px;
+  animation: fadeUp 0.4s 0.55s ease both; opacity: 0; animation-fill-mode: both;
+}
+.btn-export:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(74,158,255,0.35); }
+.btn-export:active { transform: translateY(0); opacity: 0.9; }
+
+/* ── AVISO ENTREGA ── */
+.entrega-note {
+  background: var(--blue-dim); border: 1px solid rgba(74,158,255,0.2);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+  font-size: 0.8rem; color: var(--text-soft); line-height: 1.55;
+  display: flex; gap: 10px; align-items: flex-start;
+  animation: fadeUp 0.4s 0.6s ease both; opacity: 0; animation-fill-mode: both;
+  margin-bottom: 24px;
+}
+.entrega-note strong { color: var(--blue); }
+
+/* ── ÉXITO POST-EXPORTACIÓN ── */
+.export-success {
+  display: none; text-align: center;
+  background: var(--lime-dim); border: 1px solid rgba(184,255,60,0.25);
+  border-radius: var(--radius); padding: 24px 20px; margin-bottom: 14px;
+  animation: fadeUp 0.35s ease both;
+}
+.export-success.show { display: block; }
+.export-success-icon { font-size: 2rem; margin-bottom: 10px; }
+.export-success-title {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+  color: var(--lime); margin-bottom: 6px;
+}
+.export-success-sub { font-size: 0.82rem; color: var(--text-soft); line-height: 1.5; }
+
+/* ── AUTHOR ── */
+.author-note {
+  padding: 8px 0 0; font-size: 0.7rem; color: var(--text-dim);
+  display: flex; align-items: center; gap: 8px;
+}
+.author-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+
+/* ── ANIMACIONES ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="glow-blob"></div>
+
+<div class="app">
+
+  <!-- CABECERA -->
+  <header class="module-header">
+    <a class="btn-back" href="../index.html">← volver</a>
+    <div class="header-info">
+      <span class="header-code">MASoMENOS · CD1 · M1</span>
+      <div class="header-title">Predecesores de MASoMENOS</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- INTRO -->
+    <div class="intro-section">
+      <div class="mod-badge">🔍 Actividad · CD1</div>
+      <h1 class="intro-title">¿Ya<br>existía<br><em>algo así?</em></h1>
+      <p class="intro-desc">Antes de usar una herramienta digital, conviene saber qué hay por ahí. Investiga en la web, encuentra recursos sobre álgebra de 1º ESO y documenta tus hallazgos. Al terminar, exporta un PDF y súbelo al aula virtual.</p>
+    </div>
+
+    <!-- INSTRUCCIONES -->
+    <div class="instrucciones-card">
+      <div class="instrucciones-title">Cómo hacerlo</div>
+      <div class="instrucciones-list">
+        <div class="inst-item">
+          <div class="inst-num">1</div>
+          <div>Abre el navegador y busca apps, vídeos o webs sobre <strong>álgebra 1º ESO</strong>.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">2</div>
+          <div>Rellena los datos de entre 1 y 3 recursos que hayas encontrado. El primero es <strong>obligatorio</strong>.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">3</div>
+          <div>Responde a las dos preguntas de reflexión con honestidad. No hay respuesta correcta o incorrecta.</div>
+        </div>
+        <div class="inst-item">
+          <div class="inst-num">4</div>
+          <div>Pulsa <strong>Exportar PDF</strong>, escribe tu nombre en el archivo y súbelo al aula virtual.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RECURSO 1 ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Recurso 1 de 3</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="recurso-card" id="recurso-1">
+      <div class="recurso-header">
+        <div class="recurso-num">1</div>
+        <div class="recurso-header-info">
+          <span class="recurso-header-title">Primer recurso encontrado</span>
+          <span class="recurso-header-sub">Rellena todos los campos marcados con *</span>
+        </div>
+        <span class="recurso-required">Obligatorio</span>
+      </div>
+      <div class="recurso-body">
+
+        <div class="field-group">
+          <div class="field-label">Nombre del recurso <span>*</span></div>
+          <input class="field-input" id="r1-nombre" type="text" placeholder="Ej: Khan Academy, Profe en casa, GeoGebra…" maxlength="120">
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">URL (dirección web) <span>*</span></div>
+          <input class="field-input" id="r1-url" type="url" placeholder="https://…" maxlength="300">
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Tipo de recurso <span>*</span></div>
+          <div class="tipo-grid" id="r1-tipo">
+            <button class="tipo-btn" onclick="selTipo('r1',this,'App')"><span class="tipo-emoji">📱</span><span class="tipo-label">App</span></button>
+            <button class="tipo-btn" onclick="selTipo('r1',this,'Vídeo')"><span class="tipo-emoji">🎬</span><span class="tipo-label">Vídeo</span></button>
+            <button class="tipo-btn" onclick="selTipo('r1',this,'Web')"><span class="tipo-emoji">🌐</span><span class="tipo-label">Web</span></button>
+            <button class="tipo-btn" onclick="selTipo('r1',this,'Juego')"><span class="tipo-emoji">🎮</span><span class="tipo-label">Juego</span></button>
+            <button class="tipo-btn" onclick="selTipo('r1',this,'Otro')"><span class="tipo-emoji">📄</span><span class="tipo-label">Otro</span></button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">¿Para qué sirve? <span>*</span></div>
+          <textarea class="field-input tall" id="r1-descripcion" placeholder="Explícalo en 1 o 2 frases. Qué puedes hacer con él, a quién va dirigido…" maxlength="400"></textarea>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Valoración de utilidad <span>*</span></div>
+          <div class="stars-row" id="r1-stars">
+            <button class="star-btn" onclick="selStar('r1',1)">⭐</button>
+            <button class="star-btn" onclick="selStar('r1',2)">⭐</button>
+            <button class="star-btn" onclick="selStar('r1',3)">⭐</button>
+            <button class="star-btn" onclick="selStar('r1',4)">⭐</button>
+            <button class="star-btn" onclick="selStar('r1',5)">⭐</button>
+            <span class="stars-value" id="r1-stars-val">Sin valorar</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">¿Se parece a MASoMENOS? <span>*</span></div>
+          <div class="parecido-row" id="r1-parecido">
+            <button class="parecido-btn" onclick="selParecido('r1',this,'Sí')">Sí</button>
+            <button class="parecido-btn" onclick="selParecido('r1',this,'Algo')">Algo parecido</button>
+            <button class="parecido-btn" onclick="selParecido('r1',this,'No')">No</button>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <div class="field-label">Comentario libre</div>
+          <textarea class="field-input tall" id="r1-comentario" placeholder="¿Qué te ha llamado la atención? ¿Lo recomendarías a un compañero? (Opcional)" maxlength="500"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RECURSO 2 ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Recurso 2 de 3 — opcional</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="recurso-card" id="recurso-2">
+      <div class="recurso-header">
+        <div class="recurso-num" style="color:var(--teal); background:var(--teal-dim); border-color:rgba(45,212,191,0.2)">2</div>
+        <div class="recurso-header-info">
+          <span class="recurso-header-title">Segundo recurso encontrado</span>
+          <span class="recurso-header-sub">Solo si encontraste un segundo recurso interesante</span>
+        </div>
+        <span class="recurso-optional">Opcional</span>
+      </div>
+      <div class="recurso-body">
+        <div class="field-group">
+          <div class="field-label">Nombre del recurso</div>
+          <input class="field-input" id="r2-nombre" type="text" placeholder="Nombre del recurso…" maxlength="120">
+        </div>
+        <div class="field-group">
+          <div class="field-label">URL</div>
+          <input class="field-input" id="r2-url" type="url" placeholder="https://…" maxlength="300">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Tipo</div>
+          <div class="tipo-grid" id="r2-tipo">
+            <button class="tipo-btn" onclick="selTipo('r2',this,'App')"><span class="tipo-emoji">📱</span><span class="tipo-label">App</span></button>
+            <button class="tipo-btn" onclick="selTipo('r2',this,'Vídeo')"><span class="tipo-emoji">🎬</span><span class="tipo-label">Vídeo</span></button>
+            <button class="tipo-btn" onclick="selTipo('r2',this,'Web')"><span class="tipo-emoji">🌐</span><span class="tipo-label">Web</span></button>
+            <button class="tipo-btn" onclick="selTipo('r2',this,'Juego')"><span class="tipo-emoji">🎮</span><span class="tipo-label">Juego</span></button>
+            <button class="tipo-btn" onclick="selTipo('r2',this,'Otro')"><span class="tipo-emoji">📄</span><span class="tipo-label">Otro</span></button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">¿Para qué sirve?</div>
+          <textarea class="field-input tall" id="r2-descripcion" placeholder="Breve descripción…" maxlength="400"></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Valoración de utilidad</div>
+          <div class="stars-row" id="r2-stars">
+            <button class="star-btn" onclick="selStar('r2',1)">⭐</button>
+            <button class="star-btn" onclick="selStar('r2',2)">⭐</button>
+            <button class="star-btn" onclick="selStar('r2',3)">⭐</button>
+            <button class="star-btn" onclick="selStar('r2',4)">⭐</button>
+            <button class="star-btn" onclick="selStar('r2',5)">⭐</button>
+            <span class="stars-value" id="r2-stars-val">Sin valorar</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">¿Se parece a MASoMENOS?</div>
+          <div class="parecido-row" id="r2-parecido">
+            <button class="parecido-btn" onclick="selParecido('r2',this,'Sí')">Sí</button>
+            <button class="parecido-btn" onclick="selParecido('r2',this,'Algo')">Algo parecido</button>
+            <button class="parecido-btn" onclick="selParecido('r2',this,'No')">No</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Comentario libre</div>
+          <textarea class="field-input tall" id="r2-comentario" placeholder="(Opcional)" maxlength="500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RECURSO 3 ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Recurso 3 de 3 — opcional</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="recurso-card" id="recurso-3">
+      <div class="recurso-header">
+        <div class="recurso-num" style="color:var(--purple); background:var(--purple-dim); border-color:rgba(167,139,250,0.2)">3</div>
+        <div class="recurso-header-info">
+          <span class="recurso-header-title">Tercer recurso encontrado</span>
+          <span class="recurso-header-sub">Solo si encontraste un tercero</span>
+        </div>
+        <span class="recurso-optional">Opcional</span>
+      </div>
+      <div class="recurso-body">
+        <div class="field-group">
+          <div class="field-label">Nombre del recurso</div>
+          <input class="field-input" id="r3-nombre" type="text" placeholder="Nombre del recurso…" maxlength="120">
+        </div>
+        <div class="field-group">
+          <div class="field-label">URL</div>
+          <input class="field-input" id="r3-url" type="url" placeholder="https://…" maxlength="300">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Tipo</div>
+          <div class="tipo-grid" id="r3-tipo">
+            <button class="tipo-btn" onclick="selTipo('r3',this,'App')"><span class="tipo-emoji">📱</span><span class="tipo-label">App</span></button>
+            <button class="tipo-btn" onclick="selTipo('r3',this,'Vídeo')"><span class="tipo-emoji">🎬</span><span class="tipo-label">Vídeo</span></button>
+            <button class="tipo-btn" onclick="selTipo('r3',this,'Web')"><span class="tipo-emoji">🌐</span><span class="tipo-label">Web</span></button>
+            <button class="tipo-btn" onclick="selTipo('r3',this,'Juego')"><span class="tipo-emoji">🎮</span><span class="tipo-label">Juego</span></button>
+            <button class="tipo-btn" onclick="selTipo('r3',this,'Otro')"><span class="tipo-emoji">📄</span><span class="tipo-label">Otro</span></button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">¿Para qué sirve?</div>
+          <textarea class="field-input tall" id="r3-descripcion" placeholder="Breve descripción…" maxlength="400"></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Valoración de utilidad</div>
+          <div class="stars-row" id="r3-stars">
+            <button class="star-btn" onclick="selStar('r3',1)">⭐</button>
+            <button class="star-btn" onclick="selStar('r3',2)">⭐</button>
+            <button class="star-btn" onclick="selStar('r3',3)">⭐</button>
+            <button class="star-btn" onclick="selStar('r3',4)">⭐</button>
+            <button class="star-btn" onclick="selStar('r3',5)">⭐</button>
+            <span class="stars-value" id="r3-stars-val">Sin valorar</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">¿Se parece a MASoMENOS?</div>
+          <div class="parecido-row" id="r3-parecido">
+            <button class="parecido-btn" onclick="selParecido('r3',this,'Sí')">Sí</button>
+            <button class="parecido-btn" onclick="selParecido('r3',this,'Algo')">Algo parecido</button>
+            <button class="parecido-btn" onclick="selParecido('r3',this,'No')">No</button>
+          </div>
+        </div>
+        <div class="field-group">
+          <div class="field-label">Comentario libre</div>
+          <textarea class="field-input tall" id="r3-comentario" placeholder="(Opcional)" maxlength="500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REFLEXIÓN FINAL ── -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Reflexión final</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <div class="reflexion-card">
+      <div class="reflexion-title">🧠 Piensa un momento</div>
+      <div class="reflexion-body">
+        <div class="field-group">
+          <div class="field-label">¿Qué palabras clave usaste para buscar? <span style="color:var(--orange)">*</span></div>
+          <textarea class="field-input" id="ref-busqueda" placeholder='Ej: "álgebra 1 ESO app", "ecuaciones juego móvil", "monomios explicación"…' maxlength="400"></textarea>
+        </div>
+        <div class="field-group">
+          <div class="field-label">¿Cómo has decidido si un recurso merece la pena? <span style="color:var(--orange)">*</span></div>
+          <textarea class="field-input" id="ref-criterio" placeholder="¿Te has fijado en el autor, en las opiniones, en si está actualizado, en si lo entiendes bien…?" maxlength="500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERROR BANNER -->
+    <div class="error-banner" id="error-banner">
+      ⚠️ Faltan campos obligatorios. Revisa que hayas rellenado el nombre, la URL, el tipo, la descripción, la valoración y la similitud del Recurso 1, y las dos preguntas de reflexión.
+    </div>
+
+    <!-- BOTÓN EXPORTAR -->
+    <button class="btn-export" id="btn-export" onclick="exportarPDF()">
+      ↓ Exportar PDF para entregar
+    </button>
+
+    <!-- ÉXITO -->
+    <div class="export-success" id="export-success">
+      <div class="export-success-icon">🎉</div>
+      <div class="export-success-title">¡PDF generado!</div>
+      <div class="export-success-sub">Ahora ve al aula virtual, escribe tu nombre en el archivo y súbelo a la tarea correspondiente. Esta actividad quedará registrada.</div>
+    </div>
+
+    <!-- AVISO ENTREGA -->
+    <div class="entrega-note">
+      <span>📎</span>
+      <span>Cuando tengas el PDF, <strong>ponle tu nombre al archivo</strong> antes de subirlo al aula virtual. Ejemplo: <em>predecesores_Ana_García.pdf</em></span>
+    </div>
+
+    <div class="author-note">
+      <span>Gabriel</span><div class="author-dot"></div>
+      <span>CC BY-NC-SA 4.0</span><div class="author-dot"></div>
+      <span>MASoMENOS 2026</span>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+// ── ESTADO ────────────────────────────────────────────────────────────────────
+const state = {
+  r1: { tipo: null, stars: 0, parecido: null },
+  r2: { tipo: null, stars: 0, parecido: null },
+  r3: { tipo: null, stars: 0, parecido: null },
+};
+
+// ── SELECTOR DE TIPO ──────────────────────────────────────────────────────────
+function selTipo(rec, btn, valor) {
+  state[rec].tipo = valor;
+  document.querySelectorAll(`#${rec}-tipo .tipo-btn`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── VALORACIÓN ESTRELLAS ──────────────────────────────────────────────────────
+function selStar(rec, n) {
+  state[rec].stars = n;
+  const btns = document.querySelectorAll(`#${rec}-stars .star-btn`);
+  btns.forEach((b, i) => b.classList.toggle('active', i < n));
+  const labels = ['Sin valorar','1 — Poco útil','2 — Algo útil','3 — Útil','4 — Muy útil','5 — Imprescindible'];
+  document.getElementById(`${rec}-stars-val`).textContent = labels[n];
+}
+
+// ── SELECTOR PARECIDO ─────────────────────────────────────────────────────────
+function selParecido(rec, btn, valor) {
+  state[rec].parecido = valor;
+  document.querySelectorAll(`#${rec}-parecido .parecido-btn`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── LEER CAMPO ────────────────────────────────────────────────────────────────
+function v(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+// ── VALIDACIÓN ────────────────────────────────────────────────────────────────
+function validar() {
+  let ok = true;
+  const campos = ['r1-nombre','r1-url','r1-descripcion','ref-busqueda','ref-criterio'];
+  campos.forEach(id => {
+    const el = document.getElementById(id);
+    if (!v(id)) { el.classList.add('error'); ok = false; }
+    else el.classList.remove('error');
+  });
+  if (!state.r1.tipo)    ok = false;
+  if (!state.r1.stars)   ok = false;
+  if (!state.r1.parecido) ok = false;
+  return ok;
+}
+
+// ── EXPORTAR PDF ──────────────────────────────────────────────────────────────
+function exportarPDF() {
+  if (!validar()) {
+    const banner = document.getElementById('error-banner');
+    banner.classList.add('show');
+    banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    return;
+  }
+  document.getElementById('error-banner').classList.remove('show');
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const W = 210, M = 18;
+  let y = 0;
+
+  // ── helpers ──
+  function addBg() {
+    doc.setFillColor(13, 13, 20);
+    doc.rect(0, 0, W, 297, 'F');
+  }
+  function newPage() {
+    doc.addPage();
+    addBg();
+    y = 18;
+  }
+  function checkY(needed) {
+    if (y + needed > 277) newPage();
+  }
+  function line(x1, yy, x2, r, g, b) {
+    doc.setDrawColor(r||42, g||42, b||64);
+    doc.setLineWidth(0.3);
+    doc.line(x1, yy, x2, yy);
+  }
+  function text(str, x, yy, opts) {
+    doc.text(str, x, yy, opts || {});
+  }
+  function wrapped(str, x, yy, maxW, size, r, g, b) {
+    doc.setFontSize(size || 9);
+    doc.setTextColor(r || 122, g || 122, b || 154);
+    const lines = doc.splitTextToSize(str || '—', maxW);
+    doc.text(lines, x, yy);
+    return lines.length * ((size || 9) * 0.4);
+  }
+
+  // ── Página 1 — portada ──
+  addBg();
+
+  // Borde decorativo (termina antes del pie)
+  doc.setDrawColor(74, 158, 255);
+  doc.setLineWidth(0.6);
+  doc.rect(10, 10, W - 20, 265);
+  doc.setDrawColor(42, 42, 64);
+  doc.setLineWidth(0.3);
+  doc.rect(12, 12, W - 24, 261);
+
+  // Cabecera
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  doc.setTextColor(184, 255, 60);
+  text('MASoMENOS', W / 2, 38, { align: 'center' });
+
+  doc.setFontSize(8);
+  doc.setTextColor(74, 74, 106);
+  text('1º ESO · Álgebra · Actividad CD1', W / 2, 46, { align: 'center' });
+
+  doc.setDrawColor(74, 158, 255);
+  doc.setLineWidth(0.4);
+  line(30, 52, W - 30);
+
+  // Título
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.setTextColor(232, 232, 240);
+  text('PREDECESORES DE MASoMENOS', W / 2, 66, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(122, 122, 154);
+  text('Investigación y valoración crítica de recursos digitales de álgebra', W / 2, 74, { align: 'center' });
+
+  // Fecha
+  const now = new Date();
+  const fechaStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+  const horaStr  = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+  doc.setFillColor(26, 26, 42);
+  doc.setDrawColor(74, 158, 255);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, 84, W - M * 2, 18, 3, 3, 'FD');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(74, 158, 255);
+  text('Fecha de exportación:', M + 6, 92);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(232, 232, 240);
+  text(`${fechaStr}  ·  ${horaStr}`, M + 50, 92);
+
+  // Instrucción de nombre
+  doc.setFillColor(30, 30, 48);
+  doc.setDrawColor(251, 146, 60);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(M, 108, W - M * 2, 20, 3, 3, 'FD');
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(251, 146, 60);
+  const nota = 'Antes de subir este archivo al aula virtual, añade tu nombre al nombre del archivo.';
+  const nota2 = 'Ejemplo: predecesores_NombreApellido.pdf';
+  text(nota, W / 2, 116, { align: 'center', maxWidth: W - M * 2 - 12 });
+  text(nota2, W / 2, 122, { align: 'center' });
+
+  y = 140;
+
+  // ── Función para pintar un recurso ──
+  function pintarRecurso(rkey, num, label, color) {
+    const nombre     = v(`${rkey}-nombre`);
+    const url        = v(`${rkey}-url`);
+    const desc       = v(`${rkey}-descripcion`);
+    const comentario = v(`${rkey}-comentario`);
+    const tipo       = state[rkey].tipo;
+    const stars      = state[rkey].stars;
+    const parecido   = state[rkey].parecido;
+
+    if (!nombre && !url) return; // recurso vacío (solo para opcionales)
+
+    checkY(60);
+
+    // Cabecera del recurso
+    doc.setFillColor(20, 25, 40);
+    doc.setDrawColor(...color);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(M, y, W - M * 2, 12, 2, 2, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...color);
+    text(`RECURSO ${num} — ${label.toUpperCase()}`, M + 6, y + 8);
+    y += 16;
+
+    // Filas de datos
+    function fila(etiqueta, valor) {
+      checkY(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(74, 74, 106);
+      text(etiqueta, M, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(200, 200, 215);
+      const h = wrapped(valor, M + 38, y, W - M * 2 - 40, 8, 200, 200, 215);
+      y += Math.max(6, h) + 6;
+    }
+
+    fila('Nombre:', nombre || '—');
+    fila('URL:', url || '—');
+    fila('Tipo:', tipo || '—');
+    fila('Descripción:', desc || '—');
+    fila('Utilidad:', stars ? '⭐'.repeat(stars) + ` (${stars}/5)` : '—');
+    fila('¿Parecido?:', parecido || '—');
+    if (comentario) fila('Comentario:', comentario);
+
+    y += 6;
+  }
+
+  pintarRecurso('r1', 1, 'Recurso obligatorio', [74, 158, 255]);
+  pintarRecurso('r2', 2, 'Segundo recurso',     [45, 212, 191]);
+  pintarRecurso('r3', 3, 'Tercer recurso',       [167, 139, 250]);
+
+  // ── Reflexión final ──
+  checkY(50);
+
+  doc.setFillColor(20, 15, 40);
+  doc.setDrawColor(167, 139, 250);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(M, y, W - M * 2, 12, 2, 2, 'FD');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(167, 139, 250);
+  text('REFLEXIÓN FINAL', M + 6, y + 8);
+  y += 16;
+
+  function filaRef(etiqueta, valor) {
+    checkY(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(74, 74, 106);
+    text(etiqueta, M, y);
+    y += 5;
+    const h = wrapped(valor, M, y, W - M * 2, 8, 200, 200, 215);
+    y += Math.max(6, h) + 8;
+  }
+
+  filaRef('Palabras clave usadas:', v('ref-busqueda') || '—');
+  filaRef('Criterio para valorar un recurso:', v('ref-criterio') || '—');
+
+  // ── Pie de página — todas las páginas ──
+  const lastPage = doc.getNumberOfPages();
+  for (let p = 1; p <= lastPage; p++) {
+    doc.setPage(p);
+    // Franja de fondo para aislar el pie del contenido
+    doc.setFillColor(13, 13, 20);
+    doc.rect(0, 278, W, 20, 'F');
+    // Línea separadora
+    doc.setDrawColor(42, 42, 64);
+    doc.setLineWidth(0.3);
+    doc.line(M, 280, W - M, 280);
+    // Textos
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(74, 74, 106);
+    text('Gabriel · CC BY-NC-SA 4.0 · MASoMENOS 2026', M, 286);
+    text(`${p} / ${lastPage}`, W - M, 286, { align: 'right' });
+  }
+
+  // Guardar
+  doc.save(`MASoMENOS_CD1_Predecesores.pdf`);
+
+  // Guardar en localStorage y mostrar éxito
+  localStorage.setItem('masomenos_mod1_done', '1');
+  document.getElementById('export-success').classList.add('show');
+  document.getElementById('export-success').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+</script>
+
+<script data-goatcounter="https://gabrielrogo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

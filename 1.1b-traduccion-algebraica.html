@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Traducción: lenguaje cotidiano ↔ algebraico · MASoMENOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d14; --bg2: #13131f; --bg3: #1a1a2a;
+  --surface: #1e1e30; --border: #2a2a40;
+  --lime: #b8ff3c; --lime-dim: rgba(184,255,60,0.10); --lime-glow: rgba(184,255,60,0.22);
+  --text: #e8e8f0; --text-soft: #7a7a9a; --text-dim: #4a4a6a;
+  --blue: #4a9eff; --blue-dim: rgba(74,158,255,0.10);
+  --teal: #2dd4bf; --teal-dim: rgba(45,212,191,0.10);
+  --orange: #fb923c; --orange-dim: rgba(251,146,60,0.10);
+  --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.10);
+  --red: #ff5a5a;
+  --radius: 16px; --radius-sm: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+.glow-blob {
+  position: fixed; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(45,212,191,0.06) 0%, transparent 70%);
+  top: -80px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0;
+}
+.module-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,20,0.94); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+  padding: 0 18px; height: 56px; display: flex; align-items: center; gap: 14px;
+}
+.btn-back {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-soft);
+  font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+}
+.module-header-info { flex: 1; overflow: hidden; }
+.module-header-tag {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--teal);
+  letter-spacing: 0.1em; text-transform: uppercase; display: block;
+}
+.module-header-title {
+  font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.header-badge {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--teal-dim); color: var(--teal);
+  border: 1px solid rgba(45,212,191,0.25); white-space: nowrap;
+}
+.app {
+  position: relative; z-index: 1; max-width: 480px; margin: 0 auto;
+  padding: 20px 16px 52px; display: flex; flex-direction: column; gap: 14px;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.app > * { animation: fadeUp 0.4s ease both; }
+.app > *:nth-child(n) { animation-delay: calc(0.06s * var(--i, 1)); }
+
+.hero-card {
+  background: linear-gradient(135deg, #0d2820 0%, #0d0d14 100%);
+  border: 1px solid rgba(45,212,191,0.25);
+  border-radius: var(--radius); padding: 22px 20px; text-align: center;
+}
+.hero-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+.hero-title {
+  font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+  color: var(--teal); letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.hero-desc { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+
+.sec-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+}
+.sec-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.theory-card {
+  border-radius: var(--radius); padding: 18px;
+  border: 1px solid var(--border);
+}
+.theory-card.teal { border-left: 3px solid var(--teal); background: var(--teal-dim); }
+.theory-card.blue { border-left: 3px solid var(--blue); background: var(--blue-dim); }
+.theory-card.lime { border-left: 3px solid var(--lime); background: var(--lime-dim); }
+.theory-card.orange { border-left: 3px solid var(--orange); background: var(--orange-dim); }
+.theory-title {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800; margin-bottom: 8px;
+}
+.theory-card.teal .theory-title { color: var(--teal); }
+.theory-card.blue .theory-title { color: var(--blue); }
+.theory-card.lime .theory-title { color: var(--lime); }
+.theory-card.orange .theory-title { color: var(--orange); }
+.theory-text { font-size: 0.88rem; color: var(--text-soft); line-height: 1.65; }
+.theory-text b { color: var(--text); font-weight: 600; }
+.theory-text .hl { color: var(--lime); font-weight: 700; }
+.theory-text .hl-teal { color: var(--teal); font-weight: 700; }
+.theory-text .hl-blue { color: var(--blue); font-weight: 700; }
+.theory-text .hl-orange { color: var(--orange); font-weight: 700; }
+
+/* DICCIONARIO DE PALABRAS */
+.dict-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.dict-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.dict-grid { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dict-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.dict-word { font-size: 0.78rem; color: var(--text-soft); line-height: 1.3; }
+.dict-sym {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+}
+.dict-item.plus .dict-sym { color: var(--teal); }
+.dict-item.minus .dict-sym { color: var(--red); }
+.dict-item.times .dict-sym { color: var(--orange); }
+.dict-item.div .dict-sym { color: var(--purple); }
+
+/* JUEGO DE TRADUCCIÓN */
+.translate-game {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.tg-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.tg-title {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.tg-score {
+  font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 800; color: var(--lime);
+}
+.tg-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.tg-phrase {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px; text-align: center;
+}
+.tg-phrase-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+}
+.tg-phrase-text { font-size: 1rem; color: var(--text); font-weight: 500; line-height: 1.4; }
+.tg-opts { display: flex; flex-direction: column; gap: 7px; }
+.tg-opt {
+  background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 13px 16px; cursor: pointer; text-align: center;
+  font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700;
+  color: var(--text-soft); transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  min-height: 52px; display: flex; align-items: center; justify-content: center;
+}
+.tg-opt:active:not(:disabled) { transform: scale(0.97); }
+.tg-opt:disabled { cursor: default; }
+.tg-opt.correct { border-color: rgba(184,255,60,0.5); background: var(--lime-dim); color: var(--lime); }
+.tg-opt.wrong { border-color: rgba(255,90,90,0.4); background: rgba(255,90,90,0.08); color: var(--red); }
+.tg-feedback {
+  text-align: center; font-size: 0.85rem; font-weight: 600; padding: 8px;
+  border-radius: var(--radius-sm); display: none;
+}
+.tg-feedback.ok { background: var(--lime-dim); color: var(--lime); display: block; }
+.tg-feedback.fail { background: rgba(255,90,90,0.08); color: var(--red); display: block; }
+.tg-next {
+  background: var(--teal); color: var(--bg); border: none;
+  border-radius: var(--radius-sm); padding: 13px; width: 100%; cursor: pointer;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800;
+  -webkit-tap-highlight-color: transparent; display: none; min-height: 52px;
+  transition: opacity 0.15s;
+}
+.tg-next:active { opacity: 0.8; }
+.tg-next.visible { display: block; }
+.tg-finish {
+  background: var(--lime); color: var(--bg); border: none;
+  border-radius: var(--radius-sm); padding: 13px; width: 100%; cursor: pointer;
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+  -webkit-tap-highlight-color: transparent; display: none; min-height: 52px;
+}
+.tg-finish.visible { display: block; }
+.tg-result {
+  text-align: center; padding: 20px 16px; display: none;
+}
+.tg-result.visible { display: block; }
+.tg-result-num {
+  font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
+  color: var(--lime); letter-spacing: -0.04em;
+}
+.tg-result-label { font-size: 0.85rem; color: var(--text-soft); margin-top: 4px; }
+.tg-result-msg { font-size: 0.88rem; color: var(--text); margin-top: 10px; font-weight: 600; }
+.tg-retry {
+  margin-top: 14px; background: var(--surface); border: 1.5px solid var(--border);
+  color: var(--text-soft); border-radius: var(--radius-sm); padding: 11px;
+  width: 100%; cursor: pointer; font-size: 0.88rem; font-weight: 600;
+  -webkit-tap-highlight-color: transparent; min-height: 48px;
+}
+
+/* EJEMPLOS BIDIRECCIONALES */
+.bidir-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.bidir-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.bidir-list { padding: 4px 0; }
+.bidir-row {
+  padding: 12px 16px; border-bottom: 1px solid rgba(42,42,64,0.5);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.bidir-row:last-child { border-bottom: none; }
+.bidir-nat { font-size: 0.85rem; color: var(--text-soft); flex: 1; min-width: 120px; }
+.bidir-arrow { color: var(--teal); font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+.bidir-alg {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800;
+  color: var(--lime); min-width: 80px; text-align: right;
+}
+
+/* QUIZ */
+.quiz-wrap { display: flex; flex-direction: column; gap: 12px; }
+.quiz-counter {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+}
+.quiz-dots { display: flex; gap: 5px; }
+.quiz-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+.quiz-dot.answered { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.q-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s;
+}
+.q-card.solved { border-color: rgba(184,255,60,0.25); }
+.q-head { padding: 14px 16px 10px; }
+.q-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.q-label .check-icon { color: var(--lime); display: none; }
+.q-card.solved .q-label .check-icon { display: inline; }
+.q-text { font-size: 0.95rem; line-height: 1.6; color: var(--text); }
+.opts-list { padding: 0 12px 14px; display: flex; flex-direction: column; gap: 7px; }
+.opt-btn {
+  background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; cursor: pointer; text-align: left;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; color: var(--text-soft);
+  display: flex; align-items: center; gap: 10px; min-height: 52px;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent; width: 100%;
+}
+.opt-btn:active:not(:disabled) { transform: scale(0.98); }
+.opt-btn:disabled { opacity: 0.55; cursor: default; }
+.opt-letter {
+  width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700;
+  color: var(--text-dim); flex-shrink: 0;
+}
+.opt-btn.correct { border-color: rgba(184,255,60,0.4); background: var(--lime-dim); color: var(--lime); }
+.opt-btn.correct .opt-letter { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+.opt-btn.wrong { border-color: rgba(255,90,90,0.3); background: rgba(255,90,90,0.06); color: var(--red); }
+.opt-btn.wrong .opt-letter { border-color: rgba(255,90,90,0.4); color: var(--red); }
+.feedback {
+  margin: 0 12px 10px; padding: 9px 13px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 500; display: none;
+}
+.feedback.correct { background: var(--lime-dim); color: var(--lime); border: 1px solid rgba(184,255,60,0.2); display: block; }
+.feedback.wrong { background: rgba(255,90,90,0.08); color: var(--red); border: 1px solid rgba(255,90,90,0.2); display: block; }
+.dev-panel {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.dev-panel-header {
+  padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+}
+.dev-panel-title {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.dev-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.dev-dot.active { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.dev-entries { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.dev-empty { padding: 22px 16px; text-align: center; font-size: 0.8rem; color: var(--text-dim); }
+.dev-entry {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--teal); border-radius: 8px;
+  padding: 12px 14px; font-size: 0.84rem; line-height: 1.75;
+  color: var(--text-soft); animation: fadeUp 0.3s ease both;
+}
+.dev-entry b { color: var(--text); font-weight: 600; }
+.dev-entry .hl { color: var(--lime); font-weight: 700; }
+.dev-entry .hl-teal { color: var(--teal); font-weight: 700; }
+.dev-entry .hl-orange { color: var(--orange); font-weight: 700; }
+.dev-entry .math-box {
+  background: var(--bg3); border-radius: 8px; padding: 10px 14px; margin: 8px 0;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800;
+  color: var(--lime); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.dev-entry .arrow-lbl { color: var(--teal); font-size: 0.75rem; font-weight: 400; font-family: 'Space Grotesk', sans-serif; }
+.author-note {
+  font-size: 0.7rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px; padding-top: 8px;
+}
+.author-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+</style>
+</head>
+<body>
+<div class="glow-blob"></div>
+<header class="module-header">
+  <a class="btn-back" href="../index.html">←</a>
+  <div class="module-header-info">
+    <span class="module-header-tag">Bloque 1.1 · Del número a la letra</span>
+    <span class="module-header-title">Lenguaje cotidiano ↔ algebraico</span>
+  </div>
+  <div class="header-badge">1.1b</div>
+</header>
+
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <span class="hero-icon">🔄</span>
+    <div class="hero-title">Dos idiomas, un significado</div>
+    <div class="hero-desc">El álgebra tiene su propio <b>idioma</b>. Aprende a traducir frases cotidianas a expresiones algebraicas, y viceversa.</div>
+  </div>
+
+  <!-- TEORÍA 1: DICCIONARIO -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--teal)"></div>
+    <span style="color:var(--teal)">1 · El diccionario del álgebra</span>
+  </div>
+
+  <div class="theory-card teal">
+    <div class="theory-title">Palabras → Operaciones</div>
+    <div class="theory-text">
+      En lenguaje matemático, muchas palabras cotidianas tienen una <b>traducción directa</b> a operaciones.<br><br>
+      Aprender este "diccionario" es la clave para convertir cualquier problema de palabras en una expresión algebraica.
+    </div>
+  </div>
+
+  <div class="dict-card">
+    <div class="dict-title">Diccionario álgebra básico</div>
+    <div class="dict-grid">
+      <div class="dict-item plus">
+        <div class="dict-sym">+</div>
+        <div class="dict-word">sumar · más · aumentar · añadir · ganar · total de</div>
+      </div>
+      <div class="dict-item minus">
+        <div class="dict-sym">−</div>
+        <div class="dict-word">restar · menos · disminuir · quitar · perder · diferencia</div>
+      </div>
+      <div class="dict-item times">
+        <div class="dict-sym">·</div>
+        <div class="dict-word">multiplicar · veces · el doble de · el triple de · producto</div>
+      </div>
+      <div class="dict-item div">
+        <div class="dict-sym">÷</div>
+        <div class="dict-word">dividir · la mitad de · repartir · cociente · entre</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEORÍA 2: EJEMPLOS -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--blue)"></div>
+    <span style="color:var(--blue)">2 · Ejemplos bidireccionales</span>
+  </div>
+
+  <div class="theory-card blue">
+    <div class="theory-title">La variable como "número desconocido"</div>
+    <div class="theory-text">
+      Cuando una frase dice <b>"un número"</b>, <b>"cierta cantidad"</b> o <b>"algo desconocido"</b>, usamos una letra.<br><br>
+      La letra más común es <span class="hl-blue">x</span>, pero podemos usar cualquiera: <span class="hl-blue">n</span>, <span class="hl-blue">a</span>, <span class="hl-blue">t</span>…<br><br>
+      <b>Ejemplo:</b> "tres más un número" → <span class="hl">3 + x</span>
+    </div>
+  </div>
+
+  <div class="bidir-card">
+    <div class="bidir-title">Lenguaje natural ↔ Lenguaje algebraico</div>
+    <div class="bidir-list">
+      <div class="bidir-row">
+        <div class="bidir-nat">El doble de un número</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">2·x</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">Un número aumentado en 5</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">x + 5</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">La mitad de un número</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">x ÷ 2</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">Tres menos que un número</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">x − 3</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">El triple de un número más 1</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">3·x + 1</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">La edad de Ana si tiene n años</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">n</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">El doble de la edad de Ana</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">2·n</div>
+      </div>
+      <div class="bidir-row">
+        <div class="bidir-nat">Su hermano, 4 años más joven</div>
+        <div class="bidir-arrow">↔</div>
+        <div class="bidir-alg">n − 4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEORÍA 3: ORDEN IMPORTA -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--orange)"></div>
+    <span style="color:var(--orange)">3 · ¡Ojo con el orden!</span>
+  </div>
+
+  <div class="theory-card orange">
+    <div class="theory-title">La resta no es conmutativa</div>
+    <div class="theory-text">
+      En la suma <span class="hl">x + 3</span> = <span class="hl">3 + x</span> (da igual el orden).<br><br>
+      En la resta <b>NO</b>:<br>
+      • "3 menos que x" → <span class="hl">x − 3</span> ✓<br>
+      • "x menos que 3" → <span class="hl">3 − x</span> ✓<br><br>
+      <span class="hl-orange">"Tres menos que un número"</span> = el número, quitándole 3 = <span class="hl">x − 3</span><br>
+      <span class="hl-orange">"Un número menos que tres"</span> = 3, quitándole el número = <span class="hl">3 − x</span>
+    </div>
+  </div>
+
+  <!-- JUEGO DE TRADUCCIÓN (gamificación) -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--lime)"></div>
+    <span style="color:var(--lime)">4 · 🎮 Juego: ¡Traduce al vuelo!</span>
+  </div>
+
+  <div class="translate-game">
+    <div class="tg-header">
+      <div class="tg-title">Elige la expresión correcta</div>
+      <div class="tg-score">⭐ <span id="tg-score">0</span> / <span id="tg-total">8</span></div>
+    </div>
+    <div class="tg-body" id="tg-body">
+      <div class="tg-phrase">
+        <div class="tg-phrase-label">Traduce esta frase</div>
+        <div class="tg-phrase-text" id="tg-phrase">Cargando…</div>
+      </div>
+      <div class="tg-opts" id="tg-opts"></div>
+      <div class="tg-feedback" id="tg-feedback"></div>
+      <button class="tg-next" id="tg-next" onclick="nextQuestion()">Siguiente →</button>
+      <button class="tg-finish" id="tg-finish" onclick="showResult()">Ver resultado 🏆</button>
+    </div>
+    <div class="tg-result" id="tg-result">
+      <div class="tg-result-num" id="tg-res-num">0</div>
+      <div class="tg-result-label">respuestas correctas de 8</div>
+      <div class="tg-result-msg" id="tg-res-msg"></div>
+      <button class="tg-retry" onclick="resetGame()">🔄 Repetir juego</button>
+    </div>
+  </div>
+
+  <!-- QUIZ FORMAL -->
+  <div class="sec-label" style="margin-top:4px">
+    <div class="sec-dot" style="background:var(--purple)"></div>
+    <span style="color:var(--purple)">5 · Comprueba lo que has aprendido</span>
+  </div>
+
+  <div class="quiz-wrap" id="quiz-wrap">
+    <div class="quiz-counter">
+      <span>Preguntas</span>
+      <div class="quiz-dots" id="quiz-dots"></div>
+    </div>
+  </div>
+
+  <div class="dev-panel" id="dev-panel">
+    <div class="dev-panel-header">
+      <div class="dev-dot" id="dev-dot"></div>
+      <span class="dev-panel-title">Explicación detallada</span>
+    </div>
+    <div class="dev-entries" id="dev-entries">
+      <div class="dev-empty">Responde las preguntas para ver las explicaciones.</div>
+    </div>
+  </div>
+
+  <div class="author-note">
+    <span>Gabriel</span><div class="author-dot"></div>
+    <span>CC BY-NC-SA 4.0</span><div class="author-dot"></div>
+    <span>MASoMENOS 2026</span>
+  </div>
+</div>
+
+<script>
+// ═══ JUEGO DE TRADUCCIÓN ═══
+const gameQuestions = [
+  { frase: "El doble de un número", opts: ["x + 2", "2·x", "x²"], correct: 1 },
+  { frase: "Un número aumentado en 7", opts: ["x + 7", "7·x", "x − 7"], correct: 0 },
+  { frase: "La mitad de un número", opts: ["x − 2", "2·x", "x ÷ 2"], correct: 2 },
+  { frase: "Tres menos que un número", opts: ["3 − x", "x − 3", "3·x"], correct: 1 },
+  { frase: "El triple de un número más 4", opts: ["3·x + 4", "3·(x + 4)", "x + 3 + 4"], correct: 0 },
+  { frase: "5 veces un número", opts: ["x + 5", "5·x", "x⁵"], correct: 1 },
+  { frase: "Un número disminuido en 9", opts: ["9 − x", "x + 9", "x − 9"], correct: 2 },
+  { frase: "La cuarta parte de un número", opts: ["x ÷ 4", "4·x", "x − 4"], correct: 0 },
+];
+
+let tgIdx = 0, tgScore = 0, tgAnswered = false;
+
+function renderTGQuestion() {
+  const q = gameQuestions[tgIdx];
+  document.getElementById('tg-phrase').textContent = q.frase;
+  document.getElementById('tg-total').textContent = gameQuestions.length;
+  const optsEl = document.getElementById('tg-opts');
+  optsEl.innerHTML = '';
+  q.opts.forEach((o, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'tg-opt';
+    btn.textContent = o;
+    btn.onclick = () => checkTG(oi);
+    optsEl.appendChild(btn);
+  });
+  document.getElementById('tg-feedback').className = 'tg-feedback';
+  document.getElementById('tg-next').classList.remove('visible');
+  document.getElementById('tg-finish').classList.remove('visible');
+  tgAnswered = false;
+}
+
+function checkTG(oi) {
+  if (tgAnswered) return;
+  tgAnswered = true;
+  const q = gameQuestions[tgIdx];
+  const btns = document.querySelectorAll('.tg-opt');
+  btns.forEach(b => b.disabled = true);
+  const fb = document.getElementById('tg-feedback');
+  if (oi === q.correct) {
+    btns[oi].classList.add('correct');
+    fb.textContent = '✓ ¡Correcto!';
+    fb.className = 'tg-feedback ok';
+    tgScore++;
+    document.getElementById('tg-score').textContent = tgScore;
+  } else {
+    btns[oi].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.textContent = `✗ Era: ${q.opts[q.correct]}`;
+    fb.className = 'tg-feedback fail';
+  }
+  if (tgIdx < gameQuestions.length - 1) {
+    document.getElementById('tg-next').classList.add('visible');
+  } else {
+    document.getElementById('tg-finish').classList.add('visible');
+  }
+}
+
+function nextQuestion() {
+  tgIdx++;
+  renderTGQuestion();
+}
+
+function showResult() {
+  document.getElementById('tg-body').style.display = 'none';
+  const res = document.getElementById('tg-result');
+  res.classList.add('visible');
+  document.getElementById('tg-res-num').textContent = tgScore;
+  const msgs = ['¡Sigue practicando! 💪', '¡Bien! Ya vas pillando el truco 🙂', '¡Muy bien! Casi perfecto 🌟', '¡Perfecto! Eres un traductor algebraico 🏆'];
+  const msgIdx = tgScore <= 3 ? 0 : tgScore <= 5 ? 1 : tgScore <= 7 ? 2 : 3;
+  document.getElementById('tg-res-msg').textContent = msgs[msgIdx];
+}
+
+function resetGame() {
+  tgIdx = 0; tgScore = 0; tgAnswered = false;
+  document.getElementById('tg-score').textContent = 0;
+  document.getElementById('tg-body').style.display = '';
+  document.getElementById('tg-result').classList.remove('visible');
+  renderTGQuestion();
+}
+
+// ═══ QUIZ FORMAL ═══
+const questions = [
+  {
+    texto: "¿Cómo se escribe algebraicamente <b>\"el triple de un número aumentado en 2\"</b>?",
+    opciones: ["3 + x + 2", "3·x + 2", "3·(x + 2)"],
+    correcta: 1,
+    desarrollo: `<b>Analizamos la frase parte por parte:</b><br>
+    • <span class="hl-teal">"el triple de un número"</span> → <b>3·x</b><br>
+    • <span class="hl-teal">"aumentado en 2"</span> → le sumamos 2<br>
+    <div class="math-box"><span>3·x</span><span class="arrow-lbl">+ aumentado en 2 →</span><span>3·x + 2</span></div>
+    La opción "3·(x + 2)" significaría "el triple de la suma del número y 2", que es diferente.`
+  },
+  {
+    texto: "La frase <b>\"Ana tiene el doble de años que su hermano\"</b>. Si el hermano tiene <b>n años</b>, ¿cuántos tiene Ana?",
+    opciones: ["n + 2", "n ÷ 2", "2·n"],
+    correcta: 2,
+    desarrollo: `<b>Identificamos la variable:</b> n = años del hermano.<br><br>
+    <span class="hl-teal">"el doble de"</span> → multiplicar por 2<br>
+    <div class="math-box"><span>años de Ana</span><span class="arrow-lbl">=</span><span>2·n</span></div>
+    Si el hermano tiene <span class="hl">8 años</span>, Ana tiene <span class="hl">2·8 = 16 años</span>.
+    La letra <b>n</b> nos permite expresarlo para cualquier edad del hermano.`
+  },
+  {
+    texto: "¿Cuál de estas expresiones significa <b>\"5 menos que un número\"</b>?",
+    opciones: ["5 − x", "x + 5", "x − 5"],
+    correcta: 2,
+    desarrollo: `<b>¡Ojo con el orden de la resta!</b><br><br>
+    <span class="hl-orange">"5 menos que un número"</span> = al número le quitamos 5.<br>
+    <div class="math-box"><span>número</span><span class="arrow-lbl">− 5 →</span><span>x − 5</span></div>
+    <span class="hl-orange">"5 − x"</span> significaría <b>"un número menos que 5"</b>, que es lo contrario.<br><br>
+    Truco: <span class="hl">"menos que"</span> = el número va delante, el 5 detrás.`
+  },
+  {
+    texto: "La expresión algebraica <b>2·n + 3</b> corresponde a:",
+    opciones: [
+      "El triple de un número más 2",
+      "El doble de un número aumentado en 3",
+      "Dos números sumados con 3"
+    ],
+    correcta: 1,
+    desarrollo: `<b>Traducimos la expresión al lenguaje natural:</b><br><br>
+    • <span class="hl-teal">2·n</span> = "el doble de n" ✓<br>
+    • <span class="hl-teal">+ 3</span> = "aumentado en 3" ✓<br>
+    <div class="math-box"><span>2·n + 3</span><span class="arrow-lbl">↔</span><span>"el doble de un número, aumentado en 3"</span></div>
+    Saber leer una expresión algebraica en voz alta es tan importante como saber escribirla.`
+  }
+];
+
+const solved = {};
+function buildQuiz() {
+  const wrap = document.getElementById('quiz-wrap');
+  const dotsWrap = document.getElementById('quiz-dots');
+  dotsWrap.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const dot = document.createElement('div');
+    dot.className = 'quiz-dot' + (solved[qi] ? ' answered' : '');
+    dot.id = `qdot-${qi}`;
+    dotsWrap.appendChild(dot);
+    const card = document.createElement('div');
+    card.className = 'q-card' + (solved[qi] ? ' solved' : '');
+    card.id = `q-card-${qi}`;
+    card.innerHTML = `
+      <div class="q-head">
+        <div class="q-label">Pregunta ${qi + 1} <span class="check-icon">✓</span></div>
+        <div class="q-text">${q.texto}</div>
+      </div>
+      <div class="opts-list" id="opts-${qi}">
+        ${q.opciones.map((o, oi) => `
+          <button class="opt-btn${solved[qi] && oi === q.correcta ? ' correct' : ''}"
+            ${solved[qi] ? 'disabled' : ''} onclick="checkAns(${qi}, ${oi})">
+            <div class="opt-letter">${['A','B','C'][oi]}</div><span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback${solved[qi] ? ' correct' : ''}" id="fb-${qi}"
+        style="display:${solved[qi] ? 'block' : 'none'}">${solved[qi] ? '✓ ¡Correcto!' : ''}</div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function checkAns(qi, oi) {
+  const q = questions[qi];
+  const btns = document.querySelectorAll(`#opts-${qi} .opt-btn`);
+  const fb = document.getElementById(`fb-${qi}`);
+  if (oi === q.correcta) {
+    btns.forEach((b, i) => { b.disabled = true; if (i === oi) b.classList.add('correct'); });
+    fb.textContent = '✓ ¡Correcto!';
+    fb.className = 'feedback correct';
+    fb.style.display = 'block';
+    document.getElementById(`q-card-${qi}`).classList.add('solved');
+    document.getElementById(`qdot-${qi}`).className = 'quiz-dot answered';
+    solved[qi] = true;
+    const entries = document.getElementById('dev-entries');
+    if (entries.querySelector('.dev-empty')) entries.innerHTML = '';
+    const entry = document.createElement('div');
+    entry.className = 'dev-entry';
+    entry.innerHTML = `<b>Pregunta ${qi + 1}:</b><br><br>` + q.desarrollo;
+    entries.appendChild(entry);
+    document.getElementById('dev-dot').classList.add('active');
+    setTimeout(() => { entries.scrollTop = entries.scrollHeight; }, 300);
+  } else {
+    btns[oi].classList.add('wrong');
+    btns[oi].disabled = true;
+    fb.textContent = 'No es esa. ¡Inténtalo de nuevo!';
+    fb.className = 'feedback wrong';
+    fb.style.display = 'block';
+    setTimeout(() => { fb.style.display = 'none'; btns[oi].disabled = false; btns[oi].classList.remove('wrong'); }, 1800);
+  }
+}
+
+window.onload = () => { renderTGQuestion(); buildQuiz(); };
+</script>
+<script data-goatcounter="https://gabrielrogo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

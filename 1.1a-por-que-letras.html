@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>¿Por qué usar letras? · MASoMENOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:         #0d0d14;
+  --bg2:        #13131f;
+  --bg3:        #1a1a2a;
+  --surface:    #1e1e30;
+  --border:     #2a2a40;
+  --lime:       #b8ff3c;
+  --lime-dim:   rgba(184,255,60,0.10);
+  --lime-glow:  rgba(184,255,60,0.22);
+  --text:       #e8e8f0;
+  --text-soft:  #7a7a9a;
+  --text-dim:   #4a4a6a;
+  --blue:       #4a9eff;
+  --blue-dim:   rgba(74,158,255,0.10);
+  --teal:       #2dd4bf;
+  --teal-dim:   rgba(45,212,191,0.10);
+  --orange:     #fb923c;
+  --orange-dim: rgba(251,146,60,0.10);
+  --purple:     #a78bfa;
+  --purple-dim: rgba(167,139,250,0.10);
+  --red:        #ff5a5a;
+  --radius:     16px;
+  --radius-sm:  10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+.glow-blob {
+  position: fixed; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(74,158,255,0.06) 0%, transparent 70%);
+  top: -80px; right: -100px; border-radius: 50%;
+  pointer-events: none; z-index: 0;
+}
+
+/* HEADER */
+.module-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,20,0.94); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+  padding: 0 18px; height: 56px; display: flex; align-items: center; gap: 14px;
+}
+.btn-back {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text-soft); font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  text-decoration: none; flex-shrink: 0; transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-back:active { background: var(--bg3); }
+.module-header-info { flex: 1; overflow: hidden; }
+.module-header-tag {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--blue);
+  letter-spacing: 0.1em; text-transform: uppercase; display: block;
+}
+.module-header-title {
+  font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+  color: var(--text); white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; display: block;
+}
+.header-badge {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--blue-dim); color: var(--blue);
+  border: 1px solid rgba(74,158,255,0.25); white-space: nowrap; flex-shrink: 0;
+}
+
+/* LAYOUT */
+.app {
+  position: relative; z-index: 1; max-width: 480px; margin: 0 auto;
+  padding: 20px 16px 52px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+/* INTRO HERO */
+.hero-card {
+  background: linear-gradient(135deg, #0d1a2e 0%, #0d0d14 100%);
+  border: 1px solid rgba(74,158,255,0.25);
+  border-radius: var(--radius); padding: 22px 20px; text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+.hero-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+.hero-title {
+  font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+  color: var(--blue); letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.hero-desc { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+
+/* SECTION LABELS */
+.sec-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+.sec-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* THEORY CARDS */
+.theory-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 18px; overflow: hidden;
+}
+.theory-card.blue { border-left: 3px solid var(--blue); background: var(--blue-dim); }
+.theory-card.teal { border-left: 3px solid var(--teal); background: var(--teal-dim); }
+.theory-card.lime { border-left: 3px solid var(--lime); background: var(--lime-dim); }
+.theory-card.orange { border-left: 3px solid var(--orange); background: var(--orange-dim); }
+
+.theory-title {
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800;
+  margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.theory-card.blue .theory-title { color: var(--blue); }
+.theory-card.teal .theory-title { color: var(--teal); }
+.theory-card.lime .theory-title { color: var(--lime); }
+.theory-card.orange .theory-title { color: var(--orange); }
+
+.theory-text { font-size: 0.88rem; color: var(--text-soft); line-height: 1.65; }
+.theory-text b { color: var(--text); font-weight: 600; }
+.theory-text .hl { color: var(--lime); font-weight: 700; }
+.theory-text .hl-blue { color: var(--blue); font-weight: 700; }
+.theory-text .hl-teal { color: var(--teal); font-weight: 700; }
+.theory-text .hl-orange { color: var(--orange); font-weight: 700; }
+
+/* PATTERN VISUALIZER */
+.pattern-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.pattern-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.pattern-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.pattern-row {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.pattern-step {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.pattern-shapes { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; min-width: 36px; }
+.shape-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--blue); display: inline-block;
+  animation: popIn 0.3s ease both;
+}
+.pattern-n {
+  font-family: 'Syne Mono', monospace; font-size: 0.65rem; color: var(--text-dim);
+}
+.pattern-arrow { color: var(--border); font-size: 1.2rem; margin: 0 2px; }
+.pattern-formula {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.pf-label { font-size: 0.78rem; color: var(--text-soft); }
+.pf-expr {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+  color: var(--lime);
+}
+
+/* EJEMPLO INTERACTIVO */
+.ejemplo-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.ejemplo-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.ejemplo-body { padding: 16px; }
+.slider-wrap { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.slider-row { display: flex; align-items: center; gap: 12px; }
+.slider-lbl { font-family: 'Syne Mono', monospace; font-size: 0.78rem; color: var(--blue); min-width: 40px; }
+input[type=range] {
+  flex: 1; accent-color: var(--blue); height: 4px;
+  -webkit-appearance: none; appearance: none;
+  background: var(--border); border-radius: 2px; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--blue);
+  box-shadow: 0 0 8px rgba(74,158,255,0.4);
+}
+.slider-val {
+  font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+  color: var(--lime); min-width: 30px; text-align: right;
+}
+.calc-result {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  text-align: center;
+}
+.calc-expr { font-size: 0.85rem; color: var(--text-soft); margin-bottom: 6px; }
+.calc-expr span { color: var(--blue); font-weight: 700; font-family: 'Syne Mono', monospace; }
+.calc-num {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+  color: var(--lime); letter-spacing: -0.04em;
+}
+.calc-label { font-size: 0.73rem; color: var(--text-dim); margin-top: 2px; }
+
+/* COMPARATIVA TABLA */
+.compare-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.compare-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.ctable { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+.ctable th {
+  background: var(--bg3); color: var(--text-dim); padding: 9px 12px;
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  border-bottom: 1px solid var(--border); text-align: left;
+}
+.ctable td { padding: 10px 12px; border-bottom: 1px solid rgba(42,42,64,0.5); color: var(--text-soft); vertical-align: middle; }
+.ctable tr:last-child td { border-bottom: none; }
+.ctable .td-num { font-family: 'Syne Mono', monospace; color: var(--orange); font-weight: 700; }
+.ctable .td-let { font-family: 'Syne', sans-serif; color: var(--blue); font-weight: 800; font-size: 0.95rem; }
+.ctable .td-res { color: var(--lime); font-weight: 700; }
+.ctable .td-ok { color: var(--teal); }
+
+/* QUIZ */
+.quiz-wrap { display: flex; flex-direction: column; gap: 12px; }
+.quiz-counter {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.quiz-dots { display: flex; gap: 5px; }
+.quiz-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border); transition: background 0.3s;
+}
+.quiz-dot.answered { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.quiz-dot.active { background: var(--blue); }
+
+.q-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s;
+}
+.q-card.solved { border-color: rgba(184,255,60,0.25); }
+.q-head { padding: 14px 16px 10px; }
+.q-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.q-label .check-icon { color: var(--lime); display: none; }
+.q-card.solved .q-label .check-icon { display: inline; }
+.q-text { font-size: 0.95rem; line-height: 1.6; color: var(--text); }
+
+.opts-list { padding: 0 12px 14px; display: flex; flex-direction: column; gap: 7px; }
+.opt-btn {
+  background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; cursor: pointer; text-align: left;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; color: var(--text-soft);
+  display: flex; align-items: center; gap: 10px; min-height: 52px;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent; width: 100%;
+}
+.opt-btn:active:not(:disabled) { transform: scale(0.98); }
+.opt-btn:disabled { opacity: 0.55; cursor: default; }
+.opt-letter {
+  width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700;
+  color: var(--text-dim); flex-shrink: 0; transition: all 0.15s;
+}
+.opt-btn.correct { border-color: rgba(184,255,60,0.4); background: var(--lime-dim); color: var(--lime); }
+.opt-btn.correct .opt-letter { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+.opt-btn.wrong { border-color: rgba(255,90,90,0.3); background: rgba(255,90,90,0.06); color: var(--red); }
+.opt-btn.wrong .opt-letter { border-color: rgba(255,90,90,0.4); color: var(--red); }
+
+.feedback {
+  margin: 0 12px 10px; padding: 9px 13px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 500; display: none;
+}
+.feedback.correct { background: var(--lime-dim); color: var(--lime); border: 1px solid rgba(184,255,60,0.2); display: block; }
+.feedback.wrong { background: rgba(255,90,90,0.08); color: var(--red); border: 1px solid rgba(255,90,90,0.2); display: block; }
+
+/* DESARROLLO */
+.dev-panel {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.dev-panel-header {
+  padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
+}
+.dev-panel-title {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.dev-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.dev-dot.active { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.dev-entries { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.dev-empty { padding: 22px 16px; text-align: center; font-size: 0.8rem; color: var(--text-dim); }
+.dev-entry {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--blue); border-radius: 8px;
+  padding: 12px 14px; font-size: 0.84rem; line-height: 1.75;
+  color: var(--text-soft); animation: fadeUp 0.3s ease both;
+}
+.dev-entry b { color: var(--text); font-weight: 600; }
+.dev-entry .hl { color: var(--lime); font-weight: 700; }
+.dev-entry .hl-blue { color: var(--blue); font-weight: 700; }
+.dev-entry .hl-orange { color: var(--orange); font-weight: 700; }
+.dev-entry .math-line {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg3); border-radius: 6px; padding: 8px 12px; margin: 6px 0;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--lime);
+}
+.dev-entry .math-line .arrow { color: var(--text-dim); font-size: 0.8rem; }
+
+/* FOOTER */
+.author-note {
+  font-size: 0.7rem; color: var(--text-dim);
+  display: flex; align-items: center; gap: 8px; padding-top: 8px;
+}
+.author-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.app > * { animation: fadeUp 0.4s ease both; }
+.app > *:nth-child(1) { animation-delay: 0.05s; }
+.app > *:nth-child(2) { animation-delay: 0.10s; }
+.app > *:nth-child(3) { animation-delay: 0.15s; }
+.app > *:nth-child(4) { animation-delay: 0.20s; }
+.app > *:nth-child(5) { animation-delay: 0.25s; }
+.app > *:nth-child(6) { animation-delay: 0.30s; }
+</style>
+</head>
+<body>
+<div class="glow-blob"></div>
+
+<header class="module-header">
+  <a class="btn-back" href="../index.html">←</a>
+  <div class="module-header-info">
+    <span class="module-header-tag">Bloque 1.1 · Del número a la letra</span>
+    <span class="module-header-title">¿Por qué usar letras?</span>
+  </div>
+  <div class="header-badge">1.1a</div>
+</header>
+
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <span class="hero-icon">🔤</span>
+    <div class="hero-title">¿Por qué usamos letras en matemáticas?</div>
+    <div class="hero-desc">Descubre cómo una simple letra puede representar <b>cualquier número</b> y expresar patrones que se repiten infinitamente.</div>
+  </div>
+
+  <!-- TEORÍA 1 -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--blue)"></div>
+    <span style="color:var(--blue)">1 · El problema de los casos concretos</span>
+  </div>
+
+  <div class="theory-card blue">
+    <div class="theory-title">De los números a las letras</div>
+    <div class="theory-text">
+      Imagina que quieres calcular <b>el doble de un número</b>.<br><br>
+      Si el número es <span class="hl-orange">3</span> → el doble es <span class="hl">6</span><br>
+      Si el número es <span class="hl-orange">7</span> → el doble es <span class="hl">14</span><br>
+      Si el número es <span class="hl-orange">100</span> → el doble es <span class="hl">200</span><br><br>
+      ¿Tendrías que escribir una frase diferente para <b>cada número posible</b>? Habría infinitas frases. 😰<br><br>
+      En cambio, con una letra: <b>el doble de <span class="hl-blue">n</span> es <span class="hl">2·n</span></b>. Una sola fórmula válida para siempre.
+    </div>
+  </div>
+
+  <!-- PATRÓN VISUAL -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--teal)"></div>
+    <span style="color:var(--teal)">2 · Generalización: ver el patrón</span>
+  </div>
+
+  <div class="pattern-card">
+    <div class="pattern-title">Patrón de puntos — ¿cuántos hay en el paso n?</div>
+    <div class="pattern-body">
+      <div class="pattern-row">
+        <div class="pattern-step">
+          <div class="pattern-shapes">
+            <div class="shape-dot" style="animation-delay:0.0s"></div>
+          </div>
+          <div class="pattern-n">n=1 → 1</div>
+        </div>
+        <div class="pattern-arrow">→</div>
+        <div class="pattern-step">
+          <div class="pattern-shapes">
+            <div class="shape-dot" style="animation-delay:0.1s;background:var(--teal)"></div>
+            <div class="shape-dot" style="animation-delay:0.15s;background:var(--teal)"></div>
+            <div class="shape-dot" style="animation-delay:0.2s;background:var(--teal)"></div>
+          </div>
+          <div class="pattern-n">n=2 → 3</div>
+        </div>
+        <div class="pattern-arrow">→</div>
+        <div class="pattern-step">
+          <div class="pattern-shapes">
+            <div class="shape-dot" style="animation-delay:0.1s;background:var(--purple)"></div>
+            <div class="shape-dot" style="animation-delay:0.15s;background:var(--purple)"></div>
+            <div class="shape-dot" style="animation-delay:0.2s;background:var(--purple)"></div>
+            <div class="shape-dot" style="animation-delay:0.25s;background:var(--purple)"></div>
+            <div class="shape-dot" style="animation-delay:0.3s;background:var(--purple)"></div>
+          </div>
+          <div class="pattern-n">n=3 → 5</div>
+        </div>
+        <div class="pattern-arrow">→</div>
+        <div class="pattern-step">
+          <div class="pattern-shapes">
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.1s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.15s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.2s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.25s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.3s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.35s"></div>
+            <div class="shape-dot" style="background:var(--lime);animation-delay:0.4s"></div>
+          </div>
+          <div class="pattern-n">n=4 → 7</div>
+        </div>
+      </div>
+      <div class="pattern-formula">
+        <div class="pf-label">Fórmula general:</div>
+        <div class="pf-expr">2·n − 1</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="theory-card teal">
+    <div class="theory-title">¿Qué es generalizar?</div>
+    <div class="theory-text">
+      <b>Generalizar</b> es encontrar una <span class="hl">regla que funcione para todos los casos</span>, no solo para uno concreto.<br><br>
+      En el ejemplo anterior:<br>
+      1, 3, 5, 7, … — cada vez sumamos 2.<br><br>
+      La regla es: número de puntos = <span class="hl-teal">2·n − 1</span><br><br>
+      Con esa fórmula podemos calcular el paso 100 sin dibujar nada: <span class="hl">2·100 − 1 = 199 puntos</span>.
+    </div>
+  </div>
+
+  <!-- EJEMPLO INTERACTIVO -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--lime)"></div>
+    <span style="color:var(--lime)">3 · Pruébalo tú</span>
+  </div>
+
+  <div class="ejemplo-card">
+    <div class="ejemplo-title">Fórmula interactiva — precio de una fiesta 🎉</div>
+    <div class="ejemplo-body">
+      <div class="theory-text" style="margin-bottom:14px">
+        El alquiler del local cuesta <span class="hl-orange">50 €</span> fijos, más <span class="hl-blue">8 €</span> por cada invitado.<br>
+        Fórmula: <b>Precio = 50 + 8·<span style="color:var(--blue)">n</span></b>
+      </div>
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <span class="slider-lbl">n =</span>
+          <input type="range" min="1" max="30" value="10" id="slider-invitados" oninput="calcFiesta(this.value)">
+          <span class="slider-val" id="val-invitados">10</span>
+        </div>
+      </div>
+      <div class="calc-result">
+        <div class="calc-expr">50 + 8 · <span id="n-fiesta">10</span> =</div>
+        <div class="calc-num" id="res-fiesta">130</div>
+        <div class="calc-label">euros en total</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARATIVA -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--orange)"></div>
+    <span style="color:var(--orange)">4 · Sin letra vs con letra</span>
+  </div>
+
+  <div class="compare-card">
+    <div class="compare-title">Ventaja de usar letras</div>
+    <table class="ctable">
+      <tr><th>Sin letra (específico)</th><th>Con letra (general)</th></tr>
+      <tr>
+        <td>El doble de <span class="td-num">3</span> es <span class="td-res">6</span></td>
+        <td>El doble de <span class="td-let">n</span> es <span class="td-res">2n</span></td>
+      </tr>
+      <tr>
+        <td>El doble de <span class="td-num">15</span> es <span class="td-res">30</span></td>
+        <td class="td-ok">✓ Ya lo cubre la misma fórmula</td>
+      </tr>
+      <tr>
+        <td>El doble de <span class="td-num">2847</span> es <span class="td-res">5694</span></td>
+        <td class="td-ok">✓ Ya lo cubre la misma fórmula</td>
+      </tr>
+      <tr>
+        <td style="color:var(--red)">Necesitas escribir ∞ frases</td>
+        <td class="td-ok">✓ <b>Una sola fórmula</b> para todos</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="sec-label" style="margin-top:4px">
+    <div class="sec-dot" style="background:var(--purple)"></div>
+    <span style="color:var(--purple)">5 · Comprueba lo que has aprendido</span>
+  </div>
+
+  <div class="quiz-wrap" id="quiz-wrap">
+    <div class="quiz-counter">
+      <span>Preguntas</span>
+      <div class="quiz-dots" id="quiz-dots"></div>
+    </div>
+  </div>
+
+  <!-- DESARROLLO -->
+  <div class="dev-panel" id="dev-panel">
+    <div class="dev-panel-header">
+      <div class="dev-dot" id="dev-dot"></div>
+      <span class="dev-panel-title">Explicación detallada</span>
+    </div>
+    <div class="dev-entries" id="dev-entries">
+      <div class="dev-empty">Responde las preguntas para ver las explicaciones.</div>
+    </div>
+  </div>
+
+  <div class="author-note">
+    <span>Gabriel</span><div class="author-dot"></div>
+    <span>CC BY-NC-SA 4.0</span><div class="author-dot"></div>
+    <span>MASoMENOS 2026</span>
+  </div>
+
+</div>
+
+<script>
+// SLIDER
+function calcFiesta(v) {
+  document.getElementById('val-invitados').textContent = v;
+  document.getElementById('n-fiesta').textContent = v;
+  document.getElementById('res-fiesta').textContent = 50 + 8 * parseInt(v);
+}
+
+// QUIZ DATA
+const questions = [
+  {
+    texto: "¿Por qué en álgebra usamos letras como <b>n</b> o <b>x</b>?",
+    opciones: [
+      "Para complicar las matemáticas",
+      "Para representar cualquier número con una sola expresión",
+      "Porque los números se acabaron"
+    ],
+    correcta: 1,
+    desarrollo: `<b>¡Correcto!</b> Las letras en álgebra se llaman <span class="hl-blue">variables</span> porque pueden representar <span class="hl">cualquier valor numérico</span>.<br>
+    <div class="math-line"><span>número</span><span class="arrow">→</span><span>letra → vale para todos</span></div>
+    En vez de escribir "el doble de 1, el doble de 2, el doble de 3…", escribimos <b>2·n</b> y ya está. Una expresión que funciona para <span class="hl">infinitos números</span>.`
+  },
+  {
+    texto: "La secuencia 2, 4, 6, 8, … sigue el patrón <b>2·n</b>. ¿Cuál es el término número 10?",
+    opciones: [
+      "10",
+      "20",
+      "12"
+    ],
+    correcta: 1,
+    desarrollo: `<b>¡Exacto!</b> Sustituimos <span class="hl-blue">n = 10</span> en la fórmula <b>2·n</b>:<br>
+    <div class="math-line"><span>2 · n</span><span class="arrow">→</span><span>2 · 10 = <span class="hl">20</span></span></div>
+    <b>Generalizar</b> significa que con una sola fórmula podemos calcular <span class="hl">cualquier término</span> de la secuencia sin tener que escribirlos todos.`
+  },
+  {
+    texto: "La fórmula del perímetro de un cuadrado es <b>P = 4·l</b>, donde <b>l</b> es el lado. Si el lado mide 7 cm, ¿cuánto mide el perímetro?",
+    opciones: [
+      "11 cm",
+      "28 cm",
+      "47 cm"
+    ],
+    correcta: 1,
+    desarrollo: `<b>¡Perfecto!</b> Sustituimos <span class="hl-blue">l = 7</span> en <b>P = 4·l</b>:<br>
+    <div class="math-line"><span>P = 4 · l</span><span class="arrow">→</span><span>4 · 7 = <span class="hl">28 cm</span></span></div>
+    Esta es la potencia del álgebra: la fórmula <b>4·l</b> sirve para <span class="hl">cualquier cuadrado</span>, sea cual sea su lado. Solo hay que <span class="hl-orange">sustituir</span> la letra por el valor concreto.`
+  },
+  {
+    texto: "¿Qué nombre recibe el proceso de encontrar una regla que funcione para todos los casos de un patrón?",
+    opciones: [
+      "Sustitución",
+      "Simplificación",
+      "Generalización"
+    ],
+    correcta: 2,
+    desarrollo: `<b>¡Genial!</b> <span class="hl">Generalizar</span> es exactamente eso: encontrar una expresión algebraica que capture el comportamiento de todos los casos.<br><br>
+    <b>Ejemplos de generalización:</b><br>
+    <div class="math-line"><span>1, 3, 5, 7…</span><span class="arrow">→</span><span><span class="hl">2n − 1</span></span></div>
+    <div class="math-line"><span>2, 4, 6, 8…</span><span class="arrow">→</span><span><span class="hl">2n</span></span></div>
+    Gracias a la generalización, las matemáticas pueden describir fenómenos con <span class="hl-blue">una sola fórmula</span> en vez de infinitos casos.`
+  }
+];
+
+const solved = {};
+
+function buildQuiz() {
+  const wrap = document.getElementById('quiz-wrap');
+  const dotsWrap = document.getElementById('quiz-dots');
+  dotsWrap.innerHTML = '';
+  questions.forEach((q, qi) => {
+    // dot
+    const dot = document.createElement('div');
+    dot.className = 'quiz-dot' + (solved[qi] ? ' answered' : '') + (qi === 0 && !solved[0] ? ' active' : '');
+    dot.id = `qdot-${qi}`;
+    dotsWrap.appendChild(dot);
+    // card
+    const card = document.createElement('div');
+    card.className = 'q-card' + (solved[qi] ? ' solved' : '');
+    card.id = `q-card-${qi}`;
+    card.innerHTML = `
+      <div class="q-head">
+        <div class="q-label">Pregunta ${qi + 1} <span class="check-icon">✓</span></div>
+        <div class="q-text">${q.texto}</div>
+      </div>
+      <div class="opts-list" id="opts-${qi}">
+        ${q.opciones.map((o, oi) => `
+          <button class="opt-btn${solved[qi] && oi === q.correcta ? ' correct' : ''}"
+            ${solved[qi] ? 'disabled' : ''}
+            onclick="checkAns(${qi}, ${oi})">
+            <div class="opt-letter">${['A','B','C'][oi]}</div><span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback${solved[qi] ? ' correct' : ''}" id="fb-${qi}"
+        style="display:${solved[qi] ? 'block' : 'none'}">${solved[qi] ? '✓ ¡Correcto!' : ''}</div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function checkAns(qi, oi) {
+  const q = questions[qi];
+  const btns = document.querySelectorAll(`#opts-${qi} .opt-btn`);
+  const fb = document.getElementById(`fb-${qi}`);
+
+  if (oi === q.correcta) {
+    btns.forEach((b, i) => { b.disabled = true; if (i === oi) b.classList.add('correct'); });
+    fb.textContent = '✓ ¡Correcto!';
+    fb.className = 'feedback correct';
+    fb.style.display = 'block';
+    document.getElementById(`q-card-${qi}`).classList.add('solved');
+    document.getElementById(`qdot-${qi}`).className = 'quiz-dot answered';
+    solved[qi] = true;
+
+    // añadir desarrollo
+    const entries = document.getElementById('dev-entries');
+    if (entries.querySelector('.dev-empty')) entries.innerHTML = '';
+    const entry = document.createElement('div');
+    entry.className = 'dev-entry';
+    entry.innerHTML = `<b>Pregunta ${qi + 1}:</b> ${q.texto.replace(/<b>/g,'').replace(/<\/b>/g,'')}<br><br>` + q.desarrollo;
+    entries.appendChild(entry);
+    document.getElementById('dev-dot').classList.add('active');
+    setTimeout(() => { entries.scrollTop = entries.scrollHeight; }, 300);
+  } else {
+    btns[oi].classList.add('wrong');
+    btns[oi].disabled = true;
+    fb.textContent = 'Eso no es correcto. ¡Inténtalo de nuevo!';
+    fb.className = 'feedback wrong';
+    fb.style.display = 'block';
+    setTimeout(() => { fb.style.display = 'none'; btns[oi].disabled = false; btns[oi].classList.remove('wrong'); }, 1800);
+  }
+}
+
+buildQuiz();
+</script>
+<script data-goatcounter="https://gabrielrogo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Propiedades aritméticas · MASoMENOS</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d14; --bg2: #13131f; --bg3: #1a1a2a;
+  --surface: #1e1e30; --border: #2a2a40;
+  --lime: #b8ff3c; --lime-dim: rgba(184,255,60,0.10); --lime-glow: rgba(184,255,60,0.22);
+  --text: #e8e8f0; --text-soft: #7a7a9a; --text-dim: #4a4a6a;
+  --blue: #4a9eff; --blue-dim: rgba(74,158,255,0.10);
+  --teal: #2dd4bf; --teal-dim: rgba(45,212,191,0.10);
+  --orange: #fb923c; --orange-dim: rgba(251,146,60,0.10);
+  --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.10);
+  --red: #ff5a5a;
+  --radius: 16px; --radius-sm: 10px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  -webkit-font-smoothing: antialiased; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.6;
+}
+.glow-blob {
+  position: fixed; width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(167,139,250,0.06) 0%, transparent 70%);
+  top: -80px; right: -100px; border-radius: 50%; pointer-events: none; z-index: 0;
+}
+.module-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,13,20,0.94); backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--border);
+  padding: 0 18px; height: 56px; display: flex; align-items: center; gap: 14px;
+}
+.btn-back {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--text-soft);
+  font-size: 1rem; display: flex; align-items: center; justify-content: center;
+  text-decoration: none; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+}
+.module-header-info { flex: 1; overflow: hidden; }
+.module-header-tag {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--purple);
+  letter-spacing: 0.1em; text-transform: uppercase; display: block;
+}
+.module-header-title {
+  font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700;
+  color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.header-badge {
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; font-weight: 700;
+  padding: 3px 10px; border-radius: 20px;
+  background: var(--purple-dim); color: var(--purple);
+  border: 1px solid rgba(167,139,250,0.25); white-space: nowrap;
+}
+.app {
+  position: relative; z-index: 1; max-width: 480px; margin: 0 auto;
+  padding: 20px 16px 52px; display: flex; flex-direction: column; gap: 14px;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes popIn {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.app > * { animation: fadeUp 0.4s ease both; }
+
+.hero-card {
+  background: linear-gradient(135deg, #1a0f35 0%, #0d0d14 100%);
+  border: 1px solid rgba(167,139,250,0.25);
+  border-radius: var(--radius); padding: 22px 20px; text-align: center;
+}
+.hero-icon { font-size: 3rem; margin-bottom: 10px; display: block; }
+.hero-title {
+  font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+  color: var(--purple); letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.hero-desc { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+
+.sec-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.11em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+}
+.sec-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.theory-card {
+  border-radius: var(--radius); padding: 18px; border: 1px solid var(--border);
+}
+.theory-card.purple { border-left: 3px solid var(--purple); background: var(--purple-dim); }
+.theory-card.blue   { border-left: 3px solid var(--blue);   background: var(--blue-dim);   }
+.theory-card.teal   { border-left: 3px solid var(--teal);   background: var(--teal-dim);   }
+.theory-card.lime   { border-left: 3px solid var(--lime);   background: var(--lime-dim);   }
+.theory-card.orange { border-left: 3px solid var(--orange); background: var(--orange-dim); }
+.theory-title { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800; margin-bottom: 8px; }
+.theory-card.purple .theory-title { color: var(--purple); }
+.theory-card.blue   .theory-title { color: var(--blue);   }
+.theory-card.teal   .theory-title { color: var(--teal);   }
+.theory-card.lime   .theory-title { color: var(--lime);   }
+.theory-card.orange .theory-title { color: var(--orange); }
+.theory-text { font-size: 0.88rem; color: var(--text-soft); line-height: 1.65; }
+.theory-text b { color: var(--text); }
+.theory-text .hl { color: var(--lime); font-weight: 700; }
+.theory-text .hl-purple { color: var(--purple); font-weight: 700; }
+.theory-text .hl-teal { color: var(--teal); font-weight: 700; }
+.theory-text .hl-blue { color: var(--blue); font-weight: 700; }
+.theory-text .hl-orange { color: var(--orange); font-weight: 700; }
+
+/* PROPIEDADES CARDS */
+.prop-grid { display: flex; flex-direction: column; gap: 8px; }
+.prop-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.prop-icon {
+  width: 40px; height: 40px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+}
+.prop-icon.purple { background: var(--purple-dim); border: 1px solid rgba(167,139,250,0.2); }
+.prop-icon.blue   { background: var(--blue-dim);   border: 1px solid rgba(74,158,255,0.2);  }
+.prop-icon.teal   { background: var(--teal-dim);   border: 1px solid rgba(45,212,191,0.2);  }
+.prop-icon.orange { background: var(--orange-dim); border: 1px solid rgba(251,146,60,0.2);  }
+.prop-body { flex: 1; }
+.prop-name {
+  font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 800; margin-bottom: 4px;
+}
+.prop-card:nth-child(1) .prop-name { color: var(--purple); }
+.prop-card:nth-child(2) .prop-name { color: var(--blue); }
+.prop-card:nth-child(3) .prop-name { color: var(--teal); }
+.prop-card:nth-child(4) .prop-name { color: var(--orange); }
+.prop-expr {
+  font-family: 'Syne Mono', monospace; font-size: 0.82rem; color: var(--lime);
+  margin-bottom: 4px;
+}
+.prop-desc { font-size: 0.78rem; color: var(--text-soft); line-height: 1.45; }
+
+/* VERIFICADOR INTERACTIVO */
+.verif-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.verif-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.verif-body { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.verif-prop-select { display: flex; gap: 6px; flex-wrap: wrap; }
+.prop-sel-btn {
+  padding: 7px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: var(--surface); font-size: 0.78rem; font-weight: 600;
+  color: var(--text-soft); cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: all 0.15s;
+}
+.prop-sel-btn.active { border-color: var(--purple); background: var(--purple-dim); color: var(--purple); }
+.prop-sel-btn:active { transform: scale(0.95); }
+.verif-sliders { display: flex; flex-direction: column; gap: 10px; }
+.slider-row { display: flex; align-items: center; gap: 10px; }
+.slider-lbl { font-family: 'Syne Mono', monospace; font-size: 0.78rem; color: var(--purple); min-width: 36px; }
+input[type=range] {
+  flex: 1; accent-color: var(--purple); height: 4px;
+  -webkit-appearance: none; background: var(--border); border-radius: 2px; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px;
+  border-radius: 50%; background: var(--purple); box-shadow: 0 0 8px rgba(167,139,250,0.4);
+}
+.slider-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--lime); min-width: 28px; text-align: right; }
+.verif-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.verif-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px; text-align: center;
+}
+.verif-box-label { font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+.verif-box-expr { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 4px; }
+.verif-box-num { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--purple); letter-spacing: -0.03em; }
+.verif-equal {
+  text-align: center; font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+  padding: 4px 0;
+}
+.verif-equal.yes { color: var(--lime); }
+.verif-equal.no { color: var(--red); }
+
+/* ALGORITMO VISUAL */
+.algo-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+}
+.algo-title {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase;
+}
+.algo-steps { padding: 12px; display: flex; flex-direction: column; gap: 0; }
+.algo-step {
+  display: flex; align-items: flex-start; gap: 12px; padding: 10px 8px;
+  border-left: 2px solid var(--border); margin-left: 16px; position: relative;
+}
+.algo-step:first-child { border-left-color: var(--purple); }
+.algo-step:not(:first-child):not(:last-child) { border-left-color: var(--blue); }
+.algo-step:last-child { border-left-color: var(--lime); border-bottom: none; }
+.algo-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 800;
+  position: absolute; left: -15px; top: 8px; flex-shrink: 0;
+}
+.algo-step:first-child .algo-num { background: var(--purple); color: var(--bg); }
+.algo-step:not(:first-child):not(:last-child) .algo-num { background: var(--blue); color: var(--bg); }
+.algo-step:last-child .algo-num { background: var(--lime); color: var(--bg); }
+.algo-content { padding-left: 16px; }
+.algo-step-title { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.algo-step-desc { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+.algo-step-code {
+  font-family: 'Syne Mono', monospace; font-size: 0.8rem; color: var(--lime);
+  background: var(--bg3); border-radius: 6px; padding: 5px 10px; margin-top: 5px; display: inline-block;
+}
+
+/* QUIZ */
+.quiz-wrap { display: flex; flex-direction: column; gap: 12px; }
+.quiz-counter {
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 8px;
+}
+.quiz-dots { display: flex; gap: 5px; }
+.quiz-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: background 0.3s; }
+.quiz-dot.answered { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.q-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: border-color 0.2s; }
+.q-card.solved { border-color: rgba(184,255,60,0.25); }
+.q-head { padding: 14px 16px 10px; }
+.q-label {
+  font-family: 'Syne Mono', monospace; font-size: 0.58rem; color: var(--text-dim);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.q-label .check-icon { color: var(--lime); display: none; }
+.q-card.solved .q-label .check-icon { display: inline; }
+.q-text { font-size: 0.95rem; line-height: 1.6; color: var(--text); }
+.opts-list { padding: 0 12px 14px; display: flex; flex-direction: column; gap: 7px; }
+.opt-btn {
+  background: var(--bg3); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; cursor: pointer; text-align: left;
+  font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; color: var(--text-soft);
+  display: flex; align-items: center; gap: 10px; min-height: 52px;
+  transition: all 0.15s; -webkit-tap-highlight-color: transparent; width: 100%;
+}
+.opt-btn:active:not(:disabled) { transform: scale(0.98); }
+.opt-btn:disabled { opacity: 0.55; cursor: default; }
+.opt-letter {
+  width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne Mono', monospace; font-size: 0.62rem; font-weight: 700; color: var(--text-dim); flex-shrink: 0;
+}
+.opt-btn.correct { border-color: rgba(184,255,60,0.4); background: var(--lime-dim); color: var(--lime); }
+.opt-btn.correct .opt-letter { background: var(--lime); border-color: var(--lime); color: var(--bg); }
+.opt-btn.wrong { border-color: rgba(255,90,90,0.3); background: rgba(255,90,90,0.06); color: var(--red); }
+.opt-btn.wrong .opt-letter { border-color: rgba(255,90,90,0.4); color: var(--red); }
+.feedback {
+  margin: 0 12px 10px; padding: 9px 13px; border-radius: var(--radius-sm);
+  font-size: 0.82rem; font-weight: 500; display: none;
+}
+.feedback.correct { background: var(--lime-dim); color: var(--lime); border: 1px solid rgba(184,255,60,0.2); display: block; }
+.feedback.wrong { background: rgba(255,90,90,0.08); color: var(--red); border: 1px solid rgba(255,90,90,0.2); display: block; }
+.dev-panel { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.dev-panel-header { padding: 11px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.dev-panel-title { font-family: 'Syne Mono', monospace; font-size: 0.6rem; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; }
+.dev-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+.dev-dot.active { background: var(--lime); box-shadow: 0 0 6px var(--lime-glow); }
+.dev-entries { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.dev-empty { padding: 22px 16px; text-align: center; font-size: 0.8rem; color: var(--text-dim); }
+.dev-entry {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--purple); border-radius: 8px;
+  padding: 12px 14px; font-size: 0.84rem; line-height: 1.75;
+  color: var(--text-soft); animation: fadeUp 0.3s ease both;
+}
+.dev-entry b { color: var(--text); font-weight: 600; }
+.dev-entry .hl { color: var(--lime); font-weight: 700; }
+.dev-entry .hl-purple { color: var(--purple); font-weight: 700; }
+.dev-entry .hl-teal { color: var(--teal); font-weight: 700; }
+.dev-entry .hl-orange { color: var(--orange); font-weight: 700; }
+.dev-entry .math-box {
+  background: var(--bg3); border-radius: 8px; padding: 10px 14px; margin: 8px 0;
+  font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; color: var(--lime);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.dev-entry .eq-lbl { font-size: 0.72rem; color: var(--text-dim); font-weight: 400; font-family: 'Space Grotesk', sans-serif; }
+.author-note { font-size: 0.7rem; color: var(--text-dim); display: flex; align-items: center; gap: 8px; padding-top: 8px; }
+.author-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border); }
+</style>
+</head>
+<body>
+<div class="glow-blob"></div>
+<header class="module-header">
+  <a class="btn-back" href="../index.html">←</a>
+  <div class="module-header-info">
+    <span class="module-header-tag">Bloque 1.1 · Del número a la letra</span>
+    <span class="module-header-title">Propiedades y pensamiento computacional</span>
+  </div>
+  <div class="header-badge">1.1c</div>
+</header>
+
+<div class="app">
+
+  <!-- HERO -->
+  <div class="hero-card">
+    <span class="hero-icon">⚙️</span>
+    <div class="hero-title">Las reglas del juego algebraico</div>
+    <div class="hero-desc">Las propiedades aritméticas son las <b>reglas que siempre se cumplen</b>. Conocerlas nos permite calcular de forma más rápida e inteligente.</div>
+  </div>
+
+  <!-- PROPIEDADES -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--purple)"></div>
+    <span style="color:var(--purple)">1 · Las cuatro propiedades clave</span>
+  </div>
+
+  <div class="theory-card purple">
+    <div class="theory-title">¿Por qué importan las propiedades?</div>
+    <div class="theory-text">
+      Una <b>propiedad matemática</b> es una regla que se cumple <span class="hl">siempre</span>, para cualquier número.<br><br>
+      Usarlas bien nos permite <span class="hl-purple">simplificar cálculos</span>, detectar atajos, y —sobre todo— justificar por qué algo es verdad con letras, no solo con números concretos.
+    </div>
+  </div>
+
+  <div class="prop-grid">
+    <div class="prop-card">
+      <div class="prop-icon purple">🔀</div>
+      <div class="prop-body">
+        <div class="prop-name">Propiedad conmutativa</div>
+        <div class="prop-expr">a + b = b + a &nbsp;·&nbsp; a · b = b · a</div>
+        <div class="prop-desc">El orden de los sumandos (o factores) no cambia el resultado. Solo funciona con suma y multiplicación.</div>
+      </div>
+    </div>
+    <div class="prop-card">
+      <div class="prop-icon blue">🔗</div>
+      <div class="prop-body">
+        <div class="prop-name">Propiedad asociativa</div>
+        <div class="prop-expr">(a + b) + c = a + (b + c)</div>
+        <div class="prop-desc">Podemos agrupar los números como queramos al sumar o multiplicar. Los paréntesis no cambian el resultado.</div>
+      </div>
+    </div>
+    <div class="prop-card">
+      <div class="prop-icon teal">📦</div>
+      <div class="prop-body">
+        <div class="prop-name">Propiedad distributiva</div>
+        <div class="prop-expr">a · (b + c) = a·b + a·c</div>
+        <div class="prop-desc">Multiplicar por una suma es lo mismo que multiplicar por cada sumando por separado. ¡La más usada en álgebra!</div>
+      </div>
+    </div>
+    <div class="prop-card">
+      <div class="prop-icon orange">🎯</div>
+      <div class="prop-body">
+        <div class="prop-name">Elementos neutros</div>
+        <div class="prop-expr">a + 0 = a &nbsp;·&nbsp; a · 1 = a</div>
+        <div class="prop-desc">El 0 es neutro para la suma (no cambia nada). El 1 es neutro para la multiplicación.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFICADOR INTERACTIVO -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--teal)"></div>
+    <span style="color:var(--teal)">2 · Compruébalo con números</span>
+  </div>
+
+  <div class="verif-card">
+    <div class="verif-title">Verificador de propiedades</div>
+    <div class="verif-body">
+      <div class="verif-prop-select">
+        <button class="prop-sel-btn active" onclick="setProp('conm')" id="btn-conm">Conmutativa</button>
+        <button class="prop-sel-btn" onclick="setProp('asoc')" id="btn-asoc">Asociativa</button>
+        <button class="prop-sel-btn" onclick="setProp('dist')" id="btn-dist">Distributiva</button>
+      </div>
+      <div class="verif-sliders" id="verif-sliders"></div>
+      <div class="verif-result-grid" id="verif-result-grid"></div>
+      <div class="verif-equal" id="verif-equal"></div>
+    </div>
+  </div>
+
+  <!-- PENSAMIENTO COMPUTACIONAL -->
+  <div class="sec-label">
+    <div class="sec-dot" style="background:var(--blue)"></div>
+    <span style="color:var(--blue)">3 · Pensamiento computacional</span>
+  </div>
+
+  <div class="theory-card blue">
+    <div class="theory-title">¿Qué es el pensamiento computacional?</div>
+    <div class="theory-text">
+      Es la forma de pensar que usan los programadores: <b>descomponer un problema en pasos</b> claros y ordenados que cualquiera (o un ordenador) pueda seguir.<br><br>
+      En álgebra lo usamos constantemente: para resolver una ecuación, seguimos siempre los <span class="hl-blue">mismos pasos en el mismo orden</span>.
+    </div>
+  </div>
+
+  <div class="algo-card">
+    <div class="algo-title">Algoritmo: evaluar una expresión algebraica</div>
+    <div class="algo-steps">
+      <div class="algo-step">
+        <div class="algo-num">1</div>
+        <div class="algo-content">
+          <div class="algo-step-title">Identificar la expresión y la variable</div>
+          <div class="algo-step-desc">¿Qué letra es la variable? ¿Qué valor queremos sustituir?</div>
+          <div class="algo-step-code">Expresión: 3·x + 5 &nbsp;·&nbsp; Valor: x = 4</div>
+        </div>
+      </div>
+      <div class="algo-step">
+        <div class="algo-num">2</div>
+        <div class="algo-content">
+          <div class="algo-step-title">Sustituir la letra por el número</div>
+          <div class="algo-step-desc">Reemplazamos cada aparición de la variable por su valor.</div>
+          <div class="algo-step-code">3·x + 5 → 3·4 + 5</div>
+        </div>
+      </div>
+      <div class="algo-step">
+        <div class="algo-num">3</div>
+        <div class="algo-content">
+          <div class="algo-step-title">Calcular respetando la jerarquía</div>
+          <div class="algo-step-desc">Primero multiplicaciones y divisiones, luego sumas y restas.</div>
+          <div class="algo-step-code">3·4 + 5 = 12 + 5 = 17</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="theory-card teal">
+    <div class="theory-title">La distributiva como "truco de cálculo mental"</div>
+    <div class="theory-text">
+      ¿Cuánto es <span class="hl">7 × 13</span>? Podemos aplicar la distributiva:<br><br>
+      <span class="hl-teal">7 × 13</span> = 7 × (10 + 3) = 7·10 + 7·3 = 70 + 21 = <span class="hl">91</span><br><br>
+      Es más fácil multiplicar por 10 que por 13. <b>Las propiedades algebraicas nos dan atajos para calcular mentalmente.</b>
+    </div>
+  </div>
+
+  <div class="theory-card lime">
+    <div class="theory-title">Álgebra → Programación</div>
+    <div class="theory-text">
+      En programación, una <span class="hl">variable</span> es exactamente lo mismo que en álgebra: una "caja" que guarda un valor que puede cambiar.<br><br>
+      <code style="background:var(--bg3);color:var(--lime);padding:2px 6px;border-radius:4px;font-family:'Syne Mono',monospace">x = 5</code> en Python o JavaScript es lo mismo que <span class="hl">x = 5</span> en álgebra.<br><br>
+      Aprender álgebra <b>es aprender a programar</b> en el lenguaje más antiguo del mundo.
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="sec-label" style="margin-top:4px">
+    <div class="sec-dot" style="background:var(--purple)"></div>
+    <span style="color:var(--purple)">4 · Comprueba lo que has aprendido</span>
+  </div>
+
+  <div class="quiz-wrap" id="quiz-wrap">
+    <div class="quiz-counter">
+      <span>Preguntas</span>
+      <div class="quiz-dots" id="quiz-dots"></div>
+    </div>
+  </div>
+
+  <div class="dev-panel" id="dev-panel">
+    <div class="dev-panel-header">
+      <div class="dev-dot" id="dev-dot"></div>
+      <span class="dev-panel-title">Explicación detallada</span>
+    </div>
+    <div class="dev-entries" id="dev-entries">
+      <div class="dev-empty">Responde las preguntas para ver las explicaciones.</div>
+    </div>
+  </div>
+
+  <div class="author-note">
+    <span>Gabriel</span><div class="author-dot"></div>
+    <span>CC BY-NC-SA 4.0</span><div class="author-dot"></div>
+    <span>MASoMENOS 2026</span>
+  </div>
+</div>
+
+<script>
+// ═══ VERIFICADOR ═══
+let currentProp = 'conm';
+let sliderVals = { a: 3, b: 5, c: 2 };
+
+function setProp(p) {
+  currentProp = p;
+  document.querySelectorAll('.prop-sel-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + p).classList.add('active');
+  renderVerif();
+}
+
+function renderVerif() {
+  const sv = document.getElementById('verif-sliders');
+  const rg = document.getElementById('verif-result-grid');
+  const eq = document.getElementById('verif-equal');
+  sv.innerHTML = '';
+  rg.innerHTML = '';
+
+  const mkSlider = (name, min, max, val, label) => {
+    return `<div class="slider-row">
+      <span class="slider-lbl">${label} =</span>
+      <input type="range" min="${min}" max="${max}" value="${val}" id="sl-${name}" oninput="slChange('${name}', this.value)">
+      <span class="slider-val" id="sv-${name}">${val}</span>
+    </div>`;
+  };
+
+  let left, right, leftLabel, rightLabel, leftExpr, rightExpr;
+  const a = sliderVals.a, b = sliderVals.b, c = sliderVals.c;
+
+  if (currentProp === 'conm') {
+    sv.innerHTML = mkSlider('a', 1, 20, a, 'a') + mkSlider('b', 1, 20, b, 'b');
+    left = a + b; right = b + a;
+    leftExpr = `a + b = ${a} + ${b}`; rightExpr = `b + a = ${b} + ${a}`;
+    leftLabel = 'Izquierda'; rightLabel = 'Derecha';
+  } else if (currentProp === 'asoc') {
+    sv.innerHTML = mkSlider('a', 1, 15, a, 'a') + mkSlider('b', 1, 15, b, 'b') + mkSlider('c', 1, 15, c, 'c');
+    left = (a + b) + c; right = a + (b + c);
+    leftExpr = `(${a}+${b})+${c}`; rightExpr = `${a}+(${b}+${c})`;
+    leftLabel = '(a+b)+c'; rightLabel = 'a+(b+c)';
+  } else {
+    sv.innerHTML = mkSlider('a', 1, 10, a, 'a') + mkSlider('b', 1, 10, b, 'b') + mkSlider('c', 1, 10, c, 'c');
+    left = a * (b + c); right = a * b + a * c;
+    leftExpr = `${a}·(${b}+${c})`; rightExpr = `${a}·${b}+${a}·${c}`;
+    leftLabel = 'a·(b+c)'; rightLabel = 'a·b+a·c';
+  }
+
+  rg.innerHTML = `
+    <div class="verif-box">
+      <div class="verif-box-label">${leftLabel}</div>
+      <div class="verif-box-expr">${leftExpr}</div>
+      <div class="verif-box-num" id="vb-left">${left}</div>
+    </div>
+    <div class="verif-box">
+      <div class="verif-box-label">${rightLabel}</div>
+      <div class="verif-box-expr">${rightExpr}</div>
+      <div class="verif-box-num" id="vb-right">${right}</div>
+    </div>`;
+
+  eq.textContent = left === right ? '= Siempre iguales ✓' : '≠ No son iguales';
+  eq.className = 'verif-equal ' + (left === right ? 'yes' : 'no');
+}
+
+function slChange(name, val) {
+  sliderVals[name] = parseInt(val);
+  document.getElementById('sv-' + name).textContent = val;
+  renderVerif();
+}
+
+// ═══ QUIZ ═══
+const questions = [
+  {
+    texto: "¿Cuál de estas operaciones es un ejemplo de la <b>propiedad distributiva</b>?",
+    opciones: [
+      "3 + 5 = 5 + 3",
+      "4 · (2 + 3) = 4·2 + 4·3",
+      "(2 + 3) + 1 = 2 + (3 + 1)"
+    ],
+    correcta: 1,
+    desarrollo: `<b>Identificamos cada propiedad:</b><br>
+    • <span class="hl-purple">3 + 5 = 5 + 3</span> → Conmutativa (cambiamos el orden)<br>
+    • <span class="hl">(2+3)+1 = 2+(3+1)</span> → Asociativa (cambiamos el agrupamiento)<br><br>
+    <div class="math-box"><span>4·(2+3)</span><span class="eq-lbl">=</span><span>4·2 + 4·3</span><span class="eq-lbl">=</span><span>8 + 12</span><span class="eq-lbl">=</span><span>20</span></div>
+    La <span class="hl-teal">distributiva</span> "reparte" la multiplicación sobre cada sumando del paréntesis.`
+  },
+  {
+    texto: "Queremos calcular <b>6 × 14</b> de forma rápida usando la distributiva. El primer paso es descomponer 14. ¿Cuál descomposición es útil?",
+    opciones: ["14 = 7 + 7", "14 = 10 + 4", "14 = 13 + 1"],
+    correcta: 1,
+    desarrollo: `<b>Aplicamos la distributiva con 14 = 10 + 4:</b><br>
+    <div class="math-box"><span>6 · 14</span><span class="eq-lbl">=</span><span>6 · (10 + 4)</span><span class="eq-lbl">=</span><span>60 + 24</span><span class="eq-lbl">=</span><span class="hl">84</span></div>
+    Multiplicar por 10 es inmediato (añadir un cero). Por eso <span class="hl-teal">descomponer en decenas y unidades</span> es la estrategia más eficiente.<br><br>
+    Con 14 = 7 + 7 tendríamos que hacer 6·7 dos veces, más difícil mentalmente.`
+  },
+  {
+    texto: "Si evaluamos la expresión <b>2·x + 3</b> para <b>x = 5</b>, ¿cuál es el resultado?",
+    opciones: ["16", "13", "25"],
+    correcta: 1,
+    desarrollo: `<b>Seguimos el algoritmo de evaluación paso a paso:</b><br><br>
+    <b>Paso 1 — Sustituir:</b>
+    <div class="math-box"><span>2·x + 3</span><span class="eq-lbl">→ x=5 →</span><span>2·5 + 3</span></div>
+    <b>Paso 2 — Jerarquía (primero la multiplicación):</b>
+    <div class="math-box"><span>2·5 + 3</span><span class="eq-lbl">=</span><span>10 + 3</span><span class="eq-lbl">=</span><span class="hl">13</span></div>
+    <span class="hl-purple">¡Ojo!</span> Si hubiéramos sumado primero (2·8 = 16) habríamos cometido un error de jerarquía.`
+  },
+  {
+    texto: "La propiedad <b>conmutativa</b> se aplica a la suma y la multiplicación. ¿Funciona también con la resta?",
+    opciones: [
+      "Sí, a − b = b − a siempre",
+      "No, 5 − 3 ≠ 3 − 5",
+      "Solo cuando a = b"
+    ],
+    correcta: 1,
+    desarrollo: `<b>Comprobamos con un ejemplo concreto:</b><br>
+    <div class="math-box"><span>5 − 3</span><span class="eq-lbl">=</span><span class="hl">2</span><span class="eq-lbl">pero</span><span>3 − 5</span><span class="eq-lbl">=</span><span style="color:var(--red)">−2</span></div>
+    Son diferentes, así que <span class="hl-purple">la resta NO es conmutativa</span>.<br><br>
+    En álgebra esto es crucial: <span class="hl">x − 3 ≠ 3 − x</span>. Son expresiones completamente distintas. Por eso el <b>orden importa</b> cuando escribimos una diferencia.`
+  }
+];
+
+const solved = {};
+function buildQuiz() {
+  const wrap = document.getElementById('quiz-wrap');
+  const dotsWrap = document.getElementById('quiz-dots');
+  dotsWrap.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const dot = document.createElement('div');
+    dot.className = 'quiz-dot' + (solved[qi] ? ' answered' : '');
+    dot.id = `qdot-${qi}`;
+    dotsWrap.appendChild(dot);
+    const card = document.createElement('div');
+    card.className = 'q-card' + (solved[qi] ? ' solved' : '');
+    card.id = `q-card-${qi}`;
+    card.innerHTML = `
+      <div class="q-head">
+        <div class="q-label">Pregunta ${qi + 1} <span class="check-icon">✓</span></div>
+        <div class="q-text">${q.texto}</div>
+      </div>
+      <div class="opts-list" id="opts-${qi}">
+        ${q.opciones.map((o, oi) => `
+          <button class="opt-btn${solved[qi] && oi === q.correcta ? ' correct' : ''}"
+            ${solved[qi] ? 'disabled' : ''} onclick="checkAns(${qi}, ${oi})">
+            <div class="opt-letter">${['A','B','C'][oi]}</div><span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback${solved[qi] ? ' correct' : ''}" id="fb-${qi}"
+        style="display:${solved[qi] ? 'block' : 'none'}">${solved[qi] ? '✓ ¡Correcto!' : ''}</div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+function checkAns(qi, oi) {
+  const q = questions[qi];
+  const btns = document.querySelectorAll(`#opts-${qi} .opt-btn`);
+  const fb = document.getElementById(`fb-${qi}`);
+  if (oi === q.correcta) {
+    btns.forEach((b, i) => { b.disabled = true; if (i === oi) b.classList.add('correct'); });
+    fb.textContent = '✓ ¡Correcto!';
+    fb.className = 'feedback correct';
+    fb.style.display = 'block';
+    document.getElementById(`q-card-${qi}`).classList.add('solved');
+    document.getElementById(`qdot-${qi}`).className = 'quiz-dot answered';
+    solved[qi] = true;
+    const entries = document.getElementById('dev-entries');
+    if (entries.querySelector('.dev-empty')) entries.innerHTML = '';
+    const entry = document.createElement('div');
+    entry.className = 'dev-entry';
+    entry.innerHTML = `<b>Pregunta ${qi + 1}:</b><br><br>` + q.desarrollo;
+    entries.appendChild(entry);
+    document.getElementById('dev-dot').classList.add('active');
+    setTimeout(() => { entries.scrollTop = entries.scrollHeight; }, 300);
+  } else {
+    btns[oi].classList.add('wrong');
+    btns[oi].disabled = true;
+    fb.textContent = 'No es esa. ¡Inténtalo de nuevo!';
+    fb.className = 'feedback wrong';
+    fb.style.display = 'block';
+    setTimeout(() => { fb.style.display = 'none'; btns[oi].disabled = false; btns[oi].classList.remove('wrong'); }, 1800);
+  }
+}
+
+window.onload = () => { renderVerif(); buildQuiz(); };
+</script>
+<script data-goatcounter="https://gabrielrogo.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
